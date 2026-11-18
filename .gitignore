@@ -1,0 +1,35 @@
+# Secrets and machine configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage*
+htmlcov/
+# Runtime data and generated assets
+var/
+media/
+staticfiles/
+*.sqlite3
+*.dump
+*.backup
+*.log
+*.pid
+celerybeat-schedule*
+test-results/
+node_modules/
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+# Keep migrations, example environment, assets, and licenses tracked.

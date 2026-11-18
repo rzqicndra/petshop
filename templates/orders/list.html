@@ -1,0 +1,44 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Pesanan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">KEBUTUHAN & PEMBELIAN</p>
+<h1>Pesanan {% if not staff_workspace %}Anda{% else %}produk{% endif %}.</h1>
+<p>Pantau pembayaran, persiapan barang, serta serah terima.</p>
+</div>{% if not staff_workspace %}<a class="button" href="{% url 'catalog' %}">Belanja kebutuhan {% icon 'arrow' %}</a>{% elif workspace_role == 'ADMIN' or workspace_role == 'SUPER_ADMIN' %}<a class="button" href="{% url 'cashier' %}">Penjualan kasir ＋</a>{% endif %}</div>
+<div class="table-toolbar">
+<form method="get">
+<label class="sr-only" for="order-search">Nomor pesanan</label>
+<input id="order-search" name="q" placeholder="Cari nomor pesanan…" value="{{ request.GET.q }}">
+<button type="submit" class="button secondary">Cari</button>
+</form>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Pesanan</th>
+<th>Penerimaan</th>
+<th>Total</th>
+<th>Status</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>{% for order in page %}<tr>
+<td><strong>{{ order.code }}</strong><span class="muted">{{ order.created_at|date:'d M Y H:i' }}</span>{% if staff_workspace %}<span class="muted">{{ order.customer.name }}</span>{% endif %}</td>
+<td>{{ order.get_fulfillment_display }}</td>
+<td>{{ order.total_rp|rupiah }}</td>
+<td><span class="badge {{ order.status|status_tone }}">{{ order.status|status_label }}</span>
+</td>
+<td><a href="{% url 'order_detail' order.pk %}">Lihat {% icon 'arrow' %}</a>
+</td>
+</tr>{% empty %}<tr>
+<td colspan="5">
+<div class="empty-state">Belum ada pesanan yang sesuai.</div>
+</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>{% include 'pagination.html' %}
+{% endblock %}
+

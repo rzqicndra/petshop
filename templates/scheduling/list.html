@@ -1,0 +1,44 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Booking & riwayat · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">JADWAL & RIWAYAT</p>
+<h1>Perjalanan perawatan.</h1>
+<p>Detail layanan, hasil perawatan, dan tagihan tersimpan pada masing-masing Booking.</p>
+</div>{% if not staff_workspace %}<a class="button" href="{% url 'new_booking' %}">Booking baru ＋</a>{% elif can_operate %}<a class="button" href="{% url 'walkin' %}">Pelanggan datang langsung ＋</a>{% endif %}</div>
+<div class="table-toolbar">
+<form method="get">
+<label class="sr-only" for="booking-search">Cari nomor Booking</label>
+<input id="booking-search" name="q" placeholder="Cari nomor Booking…" value="{{ request.GET.q }}">
+<button class="button secondary" type="submit">Cari</button>
+</form>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Booking & hewan</th>
+<th>Layanan</th>
+<th>Jadwal</th>
+<th>Status</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>{% for booking in page %}<tr>
+<td><strong>{{ booking.pet.name }}</strong><span class="muted">{{ booking.code }}</span>{% if staff_workspace %}<span class="muted">{{ booking.customer.name }}</span>{% endif %}</td>
+<td>{{ booking.package.name }}</td>
+<td>{{ booking.starts_at|date:'d M Y, H:i' }}{% if booking.kind_snapshot == 'BOARDING' %}<span class="muted">s.d. {{ booking.ends_at|date:'d M Y, H:i' }}</span>{% endif %}</td>
+<td><span class="badge {{ booking.status|status_tone }}">{% if booking.kind_snapshot == 'BOARDING' and booking.status == 'IN_SERVICE' %}Sedang menginap{% else %}{{ booking.status|status_label }}{% endif %}</span>
+</td>
+<td><a href="{% url 'booking_detail' booking.pk %}">Lihat {% icon 'arrow' %}</a>
+</td>
+</tr>{% empty %}<tr>
+<td colspan="5">
+<div class="empty-state">Belum ada Booking yang sesuai.</div>
+</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>{% include 'pagination.html' %}
+{% endblock %}
+

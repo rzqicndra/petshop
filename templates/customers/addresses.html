@@ -1,0 +1,43 @@
+{% extends 'base.html' %}{% load static sinau %}{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+{% endblock %}
+{% block title %}Alamat pengiriman · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">AKUN SAYA</p>
+<h1>Alamat pengiriman</h1>
+<p>Simpan alamat, kontak penerima, dan titik pengantaran.</p>
+</div><a class="button small" href="{% url 'addresses' %}?baru=1#address-form">{% icon 'plus' %} Tambah alamat</a>
+</div>
+<div class="address-layout">
+<section class="address-list">{% for address in addresses %}<article class="address-card">
+<div class="address-card-heading"><span class="master-icon">{% icon 'home' %}</span>
+<h2>{{ address.label }}</h2>{% if address.is_default %}<span class="badge green">Utama</span>{% endif %}</div>
+<p class="recipient"><strong>{{ address.recipient_name }}</strong><span>{{ address.recipient_phone }}</span>
+</p>
+<p>{{ address.address_line }}<br>{{ address.village }}{% if address.village %}, {% endif %}{{ address.district }}, {{ address.city }}<br>{{ address.province }} {{ address.postal_code }}</p>{% if address.delivery_note %}<p class="address-note">Patokan: {{ address.delivery_note }}</p>{% endif %}<div class="address-actions"><a class="text-link" href="{% url 'address_edit' address.pk %}#address-form">{% icon 'edit' %} Edit alamat</a>
+<form method="post" action="{% url 'address_delete' address.pk %}" data-confirm="Hapus alamat {{ address.label }}? Alamat pada pesanan sebelumnya tetap tersimpan.">{% csrf_token %}<button class="text-link danger-text" type="submit">{% icon 'trash' %} Hapus</button>
+</form>
+</div>
+</article>{% empty %}<div class="empty-state">{% icon 'pin' %}<h3>Ke mana pesanan Anda dikirim?</h3>
+<p>Tambahkan alamat pertama agar checkout berikutnya lebih mudah.</p>
+</div>{% endfor %}</section>
+<details class="panel address-editor" id="address-form" {% if editing or not addresses or request.GET.baru or form.errors %}open{% endif %}>
+<summary>{% icon 'pin' %} {% if editing %}Edit alamat{% else %}Tambah alamat{% endif %}</summary>
+<div class="editor-body">
+<p class="small muted">Klik peta atau geser pin ke lokasi penerima. Lengkapi alamat agar kurir mudah menemukannya.</p>
+<button class="button secondary small" type="button" id="use-location">{% icon 'pin' %} Gunakan lokasi saya</button>
+<div id="delivery-map" class="map-canvas" aria-label="Pilih titik pengantaran">
+</div>
+<p id="map-notice" class="notice info" role="status" hidden>
+</p>
+<form method="post" class="stack-form form-grid">{% csrf_token %}{% include 'includes_form.html' %}<div class="form-actions">
+<button class="button" type="submit">{% icon 'check' %} Simpan alamat</button>{% if editing %}<a class="text-link" href="{% url 'addresses' %}">Batal</a>{% endif %}</div>
+</form>
+</div>
+</details>
+</div>
+{% endblock %}
+{% block scripts %}{{ map_config|json_script:'map-config' }}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/maps.js' %}" defer></script>
+{% endblock %}

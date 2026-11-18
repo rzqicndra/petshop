@@ -1,0 +1,52 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Checkout · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">BELANJA KEBUTUHAN</p>
+<h1>Checkout</h1>
+<p>Tentukan cara menerima pesanan Anda.</p>
+</div><a class="text-link" href="{% url 'cart' %}">Edit keranjang</a>
+</div>
+<div class="checkout-steps"><span>Selesai · Keranjang</span><span class="current">2. Pengiriman</span><span>3. Pembayaran</span>
+</div>
+<div class="detail-grid">
+<div>
+<section class="panel">
+<h2>Cara menerima pesanan</h2>
+<form method="post" class="stack-form" id="checkout-method">{% csrf_token %}<input type="hidden" name="action" value="prepare">{{ form.key }}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}<div class="receive-options">
+<label>
+<input type="radio" name="fulfillment" value="PICKUP" {% if form.fulfillment.value != 'DELIVERY' %}checked{% endif %}>{% icon 'store' %}<span><strong>Ambil di toko</strong><small>Tanpa biaya pengiriman</small></span>
+</label>
+<label>
+<input type="radio" name="fulfillment" value="DELIVERY" {% if form.fulfillment.value == 'DELIVERY' %}checked{% endif %}>{% icon 'truck' %}<span><strong>Kirim ke alamat</strong><small>Kurir Toko atau kurir instan</small></span>
+</label>
+</div>
+<div id="checkout-addresses">
+<div class="panel-title">
+<h3>Alamat penerima</h3><a class="text-link small" href="{% url 'addresses' %}?baru=1">{% icon 'plus' %} Tambah</a>
+</div>{% for address in form.address.field.queryset %}<label class="checkout-address">
+<input type="radio" name="address" value="{{ address.pk }}" {% if form.address.value|stringformat:'s' == address.pk|stringformat:'s' or not form.address.value and address.is_default %}checked{% endif %}><span><strong>{{ address.recipient_name }} · {{ address.label }}</strong><small>{{ address.recipient_phone }}</small><small>{{ address.address_line }}, {{ address.city }} {{ address.postal_code }}</small></span>{% if address.is_default %}<span class="badge green">Utama</span>{% endif %}</label>{% empty %}<p class="notice info">Tambahkan alamat lengkap dan titik pengantaran terlebih dahulu.</p>{% endfor %}{{ form.address.errors }}</div>
+<button class="button secondary" type="submit">Lanjutkan {% icon 'arrow' %}</button>
+</form>
+</section>{% if draft %}<section class="panel">
+<h2>{% if draft.fulfillment == 'DELIVERY' %}Pilih pengiriman{% else %}Konfirmasi pengambilan{% endif %}</h2>{% for note in quote_messages %}<div class="notice info">{{ note }}</div>{% endfor %}<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="confirm">
+<input type="hidden" name="key" value="{{ confirm_key }}">{% if draft.fulfillment == 'DELIVERY' %}{% for quote in quotes %}<label class="quote-option">
+<input type="radio" name="quote" value="{{ quote.pk }}" required><span><strong>{{ quote.package_snapshot.label }}</strong><small>{% if quote.window %}{{ quote.window.starts_at|date:'d M, H:i' }}–{{ quote.window.ends_at|date:'H:i' }}{% else %}Instan · sesuai ketersediaan kurir{% endif %}</small></span><strong>{{ quote.fee_rp|rupiah }}</strong>
+</label>{% empty %}<p class="notice">Pengiriman belum tersedia untuk alamat ini. Coba alamat lain atau ambil di toko.</p>{% endfor %}{% else %}<div class="pickup-note">{% icon 'store' %}<div><strong>Ambil di Sinau Satwa</strong>
+<p>Tunggu status siap diambil. Tunjukkan nomor pesanan saat tiba di toko.</p>
+</div>
+</div>{% endif %}{% if draft.fulfillment == 'PICKUP' or quotes %}<button class="button full" type="submit">Buat pesanan {% icon 'arrow' %}</button>{% endif %}</form>
+<p class="small muted">Selesaikan pembayaran dalam 15 menit setelah pesanan dibuat.</p>
+</section>{% endif %}</div>
+<section class="panel order-summary">
+<h2>Ringkasan pesanan</h2>{% for line in lines %}<div class="list-row">
+<div><strong>{{ line.variant.product.name }}</strong>
+<p>{{ line.variant.label }} · {{ line.quantity }} item</p>
+</div><span>{{ line.total|rupiah }}</span>
+</div>{% endfor %}<div class="price-total"><span>Subtotal produk</span><strong>{{ total|rupiah }}</strong>
+</div>
+<p class="payment-assurance">{% icon 'lock' %} Total akhir termasuk ongkir ditampilkan sebelum pembayaran.</p>
+</section>
+</div>
+{% endblock %}

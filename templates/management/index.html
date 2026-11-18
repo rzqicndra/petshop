@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Data master · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">PENGELOLAAN TOKO</p>
+<h1>Data master</h1>
+<p>Atur informasi toko, produk, layanan, dan pengiriman dari satu tempat.</p>
+</div><span class="badge green">{% if workspace_role == 'OWNER' %}Akses lihat{% else %}Pengaturan usaha{% endif %}</span>
+</div>
+<div class="master-grid">{% for entry in entries %}<a class="master-card" href="{% url 'master_section' entry.key %}"><span class="master-icon">{% icon entry.icon %}</span>
+<div>
+<h2>{{ entry.title }}</h2>
+<p>{{ entry.description }}</p>
+</div>{% icon 'chevron' %}</a>{% endfor %}</div>
+{% endblock %}

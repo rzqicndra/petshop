@@ -1,0 +1,33 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Booking layanan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">RENCANAKAN PERAWATAN</p>
+<h1>Waktunya untuk dirawat.</h1>
+<p>Jadwal diperiksa kembali oleh sistem saat Booking dibuat.</p>
+</div>
+</div>
+<div class="two-column">
+<section class="panel">
+<h2>Detail Booking</h2>{% if has_pets %}<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}{% include 'includes_form.html' %}<button class="button" type="submit">Buat Booking {% icon 'arrow' %}</button>
+</form>{% else %}<div class="empty-state">
+<h3>Tambahkan profil hewan dahulu.</h3>
+<p>Profil membantu kami menyesuaikan paket dan menyimpan riwayat perawatan.</p><a class="button" href="{% url 'pets' %}">Tambah hewan ＋</a>
+</div>{% endif %}</section>
+<section class="panel">
+<p class="eyebrow">SEBELUM ANDA BOOKING</p>
+<h2>Supaya semuanya<br>berjalan nyaman.</h2><dl class="detail-list">
+<div><dt>Grooming & dokter</dt><dd>Pilih jadwal. Selesaikan pembayaran dalam 15 menit agar jadwal terkonfirmasi.</dd>
+</div>
+<div><dt>Penitipan</dt><dd>Isi waktu check-in, jemput, kontak darurat, dan dokumen kesehatan. Admin memeriksa kelayakan serta unit sebelum menerbitkan tagihan.</dd>
+</div>
+<div><dt>Kontak darurat</dt><dd>Tambahkan melalui Profil & kontak darurat sebelum mengajukan penitipan.</dd>
+</div>
+<div><dt>Jadwal penuh</dt><dd>Sistem meminta Anda memilih waktu lain. Kapasitas toko dan staf menggunakan jadwal yang sama.</dd>
+</div></dl>
+<p class="banner-note">Hasil diagnosis hanya diterbitkan oleh dokter hewan. Pengingat mengikuti rencana kontrol yang ditentukan dokter.</p>
+</section>
+</div>
+{% endblock %}
+

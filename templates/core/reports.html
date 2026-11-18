@@ -1,0 +1,54 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Laporan usaha · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">MONITORING USAHA</p>
+<h1>Laporan usaha.</h1>
+<p>{{ days }} hari terakhir. Dana diterima terpisah dari status penyelesaian layanan.</p>
+</div><a class="button secondary" href="?days={{ days }}&format=csv">Unduh transaksi CSV {% icon 'file' %}</a>
+</div>
+<form method="get" class="compact-form">
+<div class="field">
+<label for="days">Rentang hari</label>
+<input id="days" name="days" type="number" min="1" max="366" value="{{ days }}">
+</div>
+<button type="submit" class="button secondary">Tampilkan</button>
+</form>
+<div class="section-heading">
+<h2>Arus dana</h2>
+</div>
+<div class="stat-grid money-grid">
+<div class="stat featured"><span>Dana diterima</span><strong>{{ received|rupiah }}</strong><small>Termasuk dana yang perlu ditangani</small>
+</div>
+<div class="stat"><span>Penyesuaian dana selesai</span><strong>{{ refunded|rupiah }}</strong><small>Berdasarkan tanggal pengembalian</small>
+</div>
+<div class="stat"><span>Dana bersih</span><strong>{{ net|rupiah }}</strong><small>Belum dikurangi biaya gateway, kurir, dan operasional</small>
+</div>
+</div>{% if unapplied %}<div class="notice">Dana belum diterapkan: {{ unapplied|rupiah }}. Periksa pembayaran ganda pada tagihan terkait.</div>{% endif %}<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Tagihan</th>
+<th>Penyedia</th>
+<th>Nominal</th>
+<th>Penanganan</th>
+</tr>
+</thead>
+<tbody>{% for payment in payments %}<tr>
+<td>{{ payment.settled_at|date:'d M Y H:i' }}</td>
+<td><a href="{% url 'invoice' payment.invoice_id %}">{{ payment.invoice.code }}</a>
+</td>
+<td>{{ payment.provider }}</td>
+<td>{{ payment.amount_rp|rupiah }}</td>
+<td>{{ payment.handling_status }}</td>
+</tr>{% empty %}<tr>
+<td colspan="5">
+<div class="empty-state">Belum ada dana diterima pada rentang ini.</div>
+</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+{% endblock %}
+

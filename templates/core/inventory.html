@@ -1,0 +1,77 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Persediaan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">STOK & BATCH</p>
+<h1>Persediaan yang terjaga.</h1>
+<p>Penjualan online dan kasir memakai stok serta reservasi yang sama.</p>
+</div><a href="{% url 'management:inventory_inventorybatch_changelist' %}" class="button secondary">Kelola batch {% icon 'arrow' %}</a>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Produk / SKU</th>
+<th>Batch</th>
+<th>Waktu habis</th>
+<th>Fisik</th>
+<th>Reservasi</th>
+<th>Mutasi</th>
+</tr>
+</thead>
+<tbody>{% for batch in batches %}<tr>
+<td>{{ batch.variant.product.name }}<span class="muted">{{ batch.variant.sku }}</span>
+</td>
+<td>{{ batch.batch_code }}</td>
+<td>{{ batch.expires_on|date:'d M Y'|default:'Tidak berlaku' }}</td>
+<td>{{ batch.on_hand }}</td>
+<td>{{ batch.reserved }}</td>
+<td>{% if workspace_role != 'OWNER' %}<details>
+<summary>Catat perubahan</summary>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="batch" value="{{ batch.pk }}">
+<input type="hidden" name="key" value="{{ key }}:{{ batch.pk }}">
+<div class="field">
+<label for="stock-{{ batch.pk }}">Jumlah perubahan (+/-)</label>
+<input id="stock-{{ batch.pk }}" name="quantity" type="number" required min="-100000" max="100000">
+</div>
+<div class="field">
+<label for="stock-reason-{{ batch.pk }}">Alasan / retur diterima</label>
+<input id="stock-reason-{{ batch.pk }}" name="reason" required maxlength="2000">
+</div>
+<button type="submit" class="button small">Simpan mutasi</button>
+</form>
+</details>{% else %}Akses lihat{% endif %}</td>
+</tr>{% empty %}<tr>
+<td colspan="6">Belum ada batch persediaan.</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+<div class="section-heading">
+<h2>Ledger perubahan fisik</h2>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Waktu</th>
+<th>SKU</th>
+<th>Perubahan</th>
+<th>Alasan</th>
+<th>Pelaksana</th>
+</tr>
+</thead>
+<tbody>{% for movement in movements %}<tr>
+<td>{{ movement.created_at|date:'d M Y H:i' }}</td>
+<td>{{ movement.batch.variant.sku }}</td>
+<td>{{ movement.quantity_delta }}</td>
+<td>{{ movement.reason }}</td>
+<td>{{ movement.actor.full_name|default:'Sistem' }}</td>
+</tr>{% empty %}<tr>
+<td colspan="5">Belum ada mutasi.</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+<div class="notice info">Refund tidak menambah stok otomatis. Retur dicatat setelah barang fisik diterima dan diperiksa. Batch melewati batas waktu tidak dijual.</div>
+{% endblock %}
+

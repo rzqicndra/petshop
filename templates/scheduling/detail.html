@@ -1,0 +1,226 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}{{ booking.code }} · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">{{ booking.code }}</p>
+<h1>{{ booking.pet.name }} · {{ booking.package.service.get_kind_display }}</h1>
+<p>{{ booking.package.name }}{% if staff_workspace %} · {{ booking.customer.name }}{% endif %}</p>
+</div><span class="badge {{ booking.status|status_tone }}">{% if stay and booking.status == 'IN_SERVICE' %}Sedang menginap{% else %}{{ booking.status|status_label }}{% endif %}</span>
+</div>
+<div class="detail-grid">
+<div>
+<section class="panel">
+<h2>Rincian layanan</h2><dl class="detail-list">
+<div><dt>Hewan</dt><dd>{{ booking.pet.name }} · {{ booking.pet.species.name }}</dd>
+</div>
+<div><dt>Jadwal mulai</dt><dd>{{ booking.starts_at|date:'l, d F Y, H:i' }}</dd>
+</div>
+<div><dt>Selesai / jemput</dt><dd>{{ booking.ends_at|date:'l, d F Y, H:i' }}</dd>
+</div>{% if stay %}<div><dt>Unit penitipan</dt><dd>{{ stay.unit.resource.name|default:'Menunggu alokasi' }}</dd>
+</div>
+<div><dt>Petugas</dt><dd>{{ stay.caretaker.full_name|default:'Menunggu penugasan' }}</dd>
+</div>
+<div><dt>Biaya / malam</dt><dd>{{ stay.nightly_rate_rp|rupiah }}</dd>
+</div>
+<div><dt>Kontak darurat</dt><dd>{{ stay.emergency_snapshot.name }}<br>{{ stay.emergency_snapshot.phone }}</dd>
+</div>{% endif %}<div><dt>Catatan Anda</dt><dd>{{ booking.policy_snapshot.notes|default:'Tidak ada catatan.'|linebreaksbr }}</dd>
+</div>{% if booking.pet.allergies %}<div><dt>Alergi</dt><dd>{{ booking.pet.allergies }}</dd>
+</div>{% endif %}{% if booking.pet.handling_notes %}<div><dt>Penanganan</dt><dd>{{ booking.pet.handling_notes }}</dd>
+</div>{% endif %}</dl>{% if booking.policy_snapshot.rejection_reason %}<div class="notice">Alasan penolakan: {{ booking.policy_snapshot.rejection_reason }}</div>{% endif %}{% if booking.status == 'NEEDS_ATTENTION' %}<div class="notice">Pembayaran telah tercatat, tetapi alokasi layanan membutuhkan penanganan admin. Hubungi CS untuk jadwal alternatif atau penanganan pembayaran.</div>{% endif %}</section>
+{% if records %}<section class="panel">
+<div class="panel-title">
+<h2>Hasil pemeriksaan</h2><span class="badge green">Diterbitkan dokter</span>
+</div>{% for record in records %}<article class="timeline-item">
+<div class="meta">Versi {{ record.version_no }} · {% if record.published_at %}{{ record.published_at|date:'d M Y, H:i' }}{% else %}Draft privat dokter{% endif %} {% if record.is_current %}· Versi terkini{% endif %}</div>
+<div class="clinical-block">
+<h4>Keluhan</h4>
+<p>{{ record.complaint }}</p>
+</div>
+<div class="clinical-block">
+<h4>Temuan</h4>
+<p>{{ record.findings }}</p>
+</div>
+<div class="clinical-block">
+<h4>Diagnosis</h4>
+<p>{{ record.diagnosis }}</p>
+</div>
+<div class="clinical-block">
+<h4>Tindakan / terapi</h4>
+<p>{{ record.treatment }}</p>
+</div>
+<div class="clinical-block">
+<h4>Panduan perawatan di rumah</h4>
+<p>{{ record.aftercare }}</p>
+</div>{% if record.followup_at %}<div class="notice info"><strong>Jadwal kontrol</strong>
+<p>{{ record.followup_at|date:'l, d F Y, H:i' }}. Pengingat dikirim mengikuti jadwal yang diterbitkan dokter.</p>
+</div>{% endif %}{% if record.revision_reason %}<p class="small muted">Alasan revisi: {{ record.revision_reason }}</p>{% endif %}<div class="attachment-list">{% if record.published_at %}<a href="{% url 'medical_pdf' record.pk %}">Unduh ringkasan PDF {% icon 'file' %}</a>{% endif %}{% for attachment in record.attachments %}<a href="{% url 'file_download' attachment.file_id %}">{{ attachment.file.original_name|truncatechars:35 }} {% icon 'file' %}</a>{% endfor %}</div>
+</article>{% endfor %}</section>{% endif %}
+{% if job.result_note %}<section class="panel">
+<h2>Hasil grooming</h2>
+<p>{{ job.result_note|linebreaksbr }}</p>
+<div class="attachment-list">{% for attachment in grooming_files %}<a href="{% url 'file_download' attachment.file_id %}">{{ attachment.file.original_name|truncatechars:30 }} {% icon 'file' %}</a>{% endfor %}</div>
+</section>{% endif %}
+{% if stay %}<section class="panel">
+<div class="panel-title">
+<h2>Dokumen kesehatan</h2>{% icon 'file' %}</div>{% for document in intake_files %}<article class="document-card">
+<div class="document-heading"><span class="file-symbol">{% icon 'file' %}</span>
+<div><a class="document-name" href="{% url 'file_download' document.file_id %}">{{ document.file.original_name|truncatechars:42 }}</a>
+<p>{% if document.verified_at %}<span class="badge green">{% icon 'check' %} Terverifikasi</span><small> Berlaku sampai {{ document.valid_until|date:'d M Y' }}</small>{% else %}<span class="badge amber">Menunggu verifikasi</span>{% endif %}</p>
+</div><a class="icon-button" href="{% url 'file_download' document.file_id %}" aria-label="Unduh dokumen">{% icon 'arrow' %}</a>
+</div>{% if document.review_note %}<p class="document-note">Catatan: {{ document.review_note }}</p>{% endif %}{% if can_operate and not document.verified_at %}<details class="document-review">
+<summary>Periksa & verifikasi</summary>
+<form method="post" class="stack-form form-grid">{% csrf_token %}<input type="hidden" name="action" value="intake_verify">
+<input type="hidden" name="document" value="{{ document.pk }}">
+<div class="field">
+<label for="valid-{{ document.pk }}">Berlaku sampai</label>
+<input id="valid-{{ document.pk }}" type="date" name="valid_until" required>
+</div>
+<div class="field">
+<label for="intake-note-{{ document.pk }}">Catatan pemeriksaan</label>
+<input id="intake-note-{{ document.pk }}" name="reason" maxlength="2000">
+</div>
+<div class="form-actions">
+<button type="submit" class="button small">{% icon 'check' %} Verifikasi dokumen</button>
+</div>
+</form>
+</details>{% endif %}{% if booking.status == 'SUBMITTED' or booking.status == 'HELD' or booking.status == 'CONFIRMED' or booking.status == 'IN_SERVICE' %}{% if can_operate or not staff_workspace %}<details class="document-replace">
+<summary>{% icon 'edit' %} Ganti dokumen</summary>
+<p class="small muted">Dokumen pengganti akan diperiksa ulang. Riwayat dokumen sebelumnya tetap tersimpan.</p>
+<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="intake_replace">
+<input type="hidden" name="document" value="{{ document.pk }}">
+<div class="field">
+<label for="replace-{{ document.pk }}">Dokumen pengganti</label>
+<input type="file" id="replace-{{ document.pk }}" name="file" accept="image/jpeg,image/png,application/pdf" required>
+</div>
+<button class="button secondary small" type="submit">Simpan dokumen pengganti</button>
+</form>
+</details>{% endif %}{% endif %}</article>{% empty %}<div class="empty-state compact">{% icon 'upload' %}<p>Dokumen kesehatan belum ditambahkan.</p>
+</div>{% endfor %}{% if booking.status == 'SUBMITTED' or booking.status == 'CONFIRMED' or booking.status == 'HELD' or booking.status == 'IN_SERVICE' %}{% if can_operate or not staff_workspace %}<details class="block-form" {% if not intake_files %}open{% endif %}>
+<summary>{% icon 'plus' %} Tambah dokumen kesehatan</summary>
+<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="intake_upload">
+<div class="field">
+<label for="intake-file">Foto atau PDF dokumen kesehatan</label>
+<input id="intake-file" type="file" name="file" accept="image/jpeg,image/png,application/pdf" required>
+</div>
+<button type="submit" class="button secondary small">Unggah dokumen</button>
+</form>
+</details>{% endif %}{% endif %}</section>
+<section class="panel">
+<h2>Kabar selama menginap</h2>{% for log in care_logs %}<article class="timeline-item">
+<p class="meta">{{ log.recorded_at|date:'l, d F Y, H:i' }}</p>
+<div class="clinical-block">
+<h4>Makan & minum</h4>
+<p>{{ log.feeding }}</p>
+</div>
+<div class="clinical-block">
+<h4>Kondisi</h4>
+<p>{{ log.condition }}</p>
+</div>{% if log.activity %}<div class="clinical-block">
+<h4>Aktivitas</h4>
+<p>{{ log.activity }}</p>
+</div>{% endif %}<div class="attachment-list">{% for file in log.files %}<a href="{% url 'file_download' file.file_id %}">Foto / dokumen kabar hewan {% icon 'file' %}</a>{% endfor %}</div>
+</article>{% empty %}<p class="muted small">Kabar harian muncul setelah hewan check-in dan petugas menerbitkan catatan.</p>{% endfor %}</section>{% endif %}
+{% if is_doctor and booking.status == 'IN_SERVICE' or is_doctor and booking.status == 'COMPLETED' %}<section class="panel">
+<p class="eyebrow">DOKTER / CATATAN PEMERIKSAAN</p>
+<h2>Rekam medis & panduan</h2>
+<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}{% include 'includes_form.html' with form=medical_form %}<div class="actions">
+<button class="button secondary" type="submit" name="action" value="medical_save">Simpan draft</button>
+<button class="button" type="submit" name="action" value="medical_publish">Terbitkan ke pelanggan {% icon 'arrow' %}</button>
+</div>
+</form>{% if internal_notes %}<details>
+<summary>Catatan internal dokter</summary>{% for note in internal_notes %}<div class="timeline-item">
+<p>{{ note.content|linebreaksbr }}</p><small class="muted">{{ note.created_at|date:'d M Y H:i' }}</small>
+</div>{% endfor %}</details>{% endif %}</section>{% endif %}
+{% if is_groomer and booking.status == 'IN_SERVICE' %}<section class="panel">
+<h2>Hasil grooming</h2>
+<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="grooming_ready">
+<div class="field">
+<label for="result-note">Hasil perawatan & panduan</label><textarea id="result-note" name="result_note" rows="4" required maxlength="4000"></textarea>
+</div>
+<div class="field">
+<label for="groom-file">Foto / PDF hasil</label>
+<input id="groom-file" name="file" type="file" accept="image/jpeg,image/png,application/pdf">
+</div>
+<button class="button" type="submit">Siap dijemput {% icon 'arrow' %}</button>
+</form>
+</section>{% endif %}
+{% if is_caretaker and booking.status == 'IN_SERVICE' or can_operate and stay and booking.status == 'IN_SERVICE' %}<section class="panel">
+<h2>Catat kabar harian</h2>
+<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="care_log">{% include 'includes_form.html' with form=care_form %}<button class="button" type="submit">Terbitkan kabar ke pelanggan {% icon 'arrow' %}</button>
+</form>
+</section>{% endif %}</div>
+<div>
+<section class="panel">
+<h2>Tagihan layanan</h2>{% if invoice|invoice_available %}<dl class="detail-list">
+<div><dt>Status</dt><dd><span class="badge {{ invoice.status|status_tone }}">{{ invoice.status|status_label }}</span></dd>
+</div>{% if invoice.expires_at and invoice.status == 'UNPAID' %}<div><dt>Batas bayar</dt><dd>{{ invoice.expires_at|date:'d M Y H:i' }}</dd>
+</div>{% endif %}</dl>
+<div class="price-total"><span>Total awal</span><strong>{{ invoice.total_rp|rupiah }}</strong>
+</div><a class="button full" href="{% url 'invoice' invoice.pk %}">Buka tagihan {% icon 'arrow' %}</a>{% else %}<p class="muted small">Tagihan diterbitkan setelah admin menyetujui pengajuan dan mengalokasikan unit.</p>{% endif %}</section>
+{% if stay %}<section class="panel">
+<h2>Perpanjangan menginap</h2>
+<p class="muted small">Tanggal jemput efektif tetap {{ booking.ends_at|date:'d M Y H:i' }} sampai perpanjangan disetujui dan dibayar.</p>{% for extension in extensions %}<article class="extension-card"><span class="badge {{ extension.status|status_tone }}">{{ extension.status|status_label }}</span>
+<p><strong>{{ extension.requested_checkout_at|date:'d M Y H:i' }}</strong><br>Tambahan {{ extension.extra_nights }} malam · {{ extension.extra_amount_rp|rupiah }}</p>{% if extension.review_reason %}<p>Catatan admin: {{ extension.review_reason }}</p>{% endif %}{% if extension.invoice|invoice_available %}<a class="text-link small" href="{% url 'invoice' extension.invoice.pk %}">Lihat tagihan tambahan {% icon 'arrow' %}</a>{% endif %}{% if can_operate and extension.status == 'SUBMITTED' or can_operate and extension.status == 'NEEDS_ATTENTION' %}<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="extension" value="{{ extension.pk }}">
+<div class="field">
+<label for="extension-reason-{{ extension.pk }}">Catatan keputusan (wajib saat menolak)</label><textarea id="extension-reason-{{ extension.pk }}" name="reason" rows="2" maxlength="2000"></textarea>
+</div>
+<div class="actions">{% if extension.status == 'SUBMITTED' %}<button class="button small" type="submit" name="action" value="extension_approve">Setujui</button>{% endif %}<button class="button danger small" type="submit" name="action" value="extension_reject">Tolak</button>
+</div>
+</form>{% endif %}</article>{% empty %}<p class="muted small">Belum ada pengajuan perpanjangan.</p>{% endfor %}{% if not staff_workspace and booking.status == 'IN_SERVICE' %}<form method="post" class="stack-form block-form">{% csrf_token %}<input type="hidden" name="action" value="extend">{% include 'includes_form.html' with form=extension_form %}<button class="button secondary" type="submit">Ajukan perpanjangan {% icon 'arrow' %}</button>
+</form>{% endif %}</section>{% endif %}
+{% if can_operate and stay and booking.status == 'SUBMITTED' %}<section class="panel">
+<h2>Tinjau pengajuan penitipan</h2>
+<p class="muted small">Verifikasi dokumen terlebih dahulu. Unit dan biaya dikunci sebelum tagihan diterbitkan.</p>
+<form method="post" class="stack-form">{% csrf_token %}<div class="field">
+<label for="unit">Unit penitipan</label><select name="unit" id="unit"><option value="">Pilih unit</option>{% for unit in units %}<option value="{{ unit.pk }}">{{ unit.resource.name }} · {{ unit.nightly_rate_rp|rupiah }}/malam</option>{% endfor %}</select>
+</div>
+<div class="field">
+<label for="staff">Petugas</label><select name="staff" id="staff"><option value="">Pilih petugas</option>{% for user in caretakers %}<option value="{{ user.pk }}">{{ user.full_name }}</option>{% endfor %}</select>
+</div>
+<div class="field">
+<label for="stay-reason">Alasan / catatan keputusan</label><textarea id="stay-reason" name="reason" rows="3" maxlength="2000"></textarea>
+</div>
+<button class="button" type="submit" name="action" value="stay_approve">Setujui & terbitkan tagihan</button>
+<button class="button danger" type="submit" name="action" value="stay_reject">Tolak pengajuan</button>
+</form>
+</section>{% endif %}
+{% if is_doctor and booking.status == 'CONFIRMED' or is_groomer and booking.status == 'CONFIRMED' %}<section class="panel">
+<h2>Pelaksanaan layanan</h2>
+<form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="start">Mulai layanan {% icon 'arrow' %}</button>
+</form>
+</section>{% endif %}
+{% if visit and is_doctor and booking.status == 'IN_SERVICE' or visit and can_operate and booking.status == 'IN_SERVICE' or job and is_groomer and booking.status == 'READY_PICKUP' or job and can_operate and booking.status == 'READY_PICKUP' %}<section class="panel">
+<h2>Serah terima</h2>
+<p class="muted small">Tandai selesai setelah hasil diterbitkan dan hewan diserahkan kepada pemilik.</p>
+<form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="finish">Selesaikan & serahkan {% icon 'arrow' %}</button>
+</form>
+</section>{% endif %}
+{% if stay and is_caretaker or stay and can_operate %}<section class="panel">
+<h2>Check-in / check-out</h2>{% if booking.status == 'CONFIRMED' %}<form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="checkin">Catat check-in {% icon 'arrow' %}</button>
+</form>{% elif booking.status == 'IN_SERVICE' %}<p class="muted small">Pastikan hewan serta barang bawaan telah diserahkan. Waktu pembersihan unit tetap dijaga.</p>
+<form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="checkout">Catat check-out {% icon 'arrow' %}</button>
+</form>{% else %}<p class="muted small">Aksi mengikuti status Booking.</p>{% endif %}</section>{% endif %}
+{% if not staff_workspace and booking.status == 'CONFIRMED' and not stay %}<section class="panel">
+<h2>Ubah jadwal</h2>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="reschedule">{% include 'includes_form.html' with form=reschedule_form %}<button class="button secondary" type="submit">Periksa & ubah jadwal</button>
+</form>
+</section>{% endif %}
+{% if not staff_workspace and booking.status == 'COMPLETED' %}<section class="panel">
+<h2>Ceritakan pengalaman Anda.</h2>
+<p class="muted small">Ulasan hanya tersedia untuk layanan yang selesai dan dibayar.</p><a class="button secondary full" href="{% url 'review' 'booking' booking.pk %}">{% if review %}Edit ulasan{% else %}Tulis ulasan{% endif %} ☆</a>
+</section>{% endif %}
+{% if booking.status == 'SUBMITTED' or booking.status == 'AWAITING_PAYMENT' or can_operate and booking.status == 'CONFIRMED' or can_operate and booking.status == 'NEEDS_ATTENTION' %}{% if not staff_workspace or can_operate %}<section class="panel">
+<details>
+<summary>Batalkan Booking</summary>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="cancel">
+<div class="field">
+<label for="cancel-reason">Alasan pembatalan</label><textarea name="reason" id="cancel-reason" required maxlength="2000" rows="2"></textarea>
+</div>
+<button class="button danger" type="submit">Batalkan Booking</button>
+</form>
+</details>
+</section>{% endif %}{% endif %}</div>
+</div>
+{% endblock %}
+

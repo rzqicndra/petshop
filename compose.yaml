@@ -1,0 +1,90 @@
+name: sinau-satwa
+
+x-app: &app
+  build:
+    context: .
+    args:
+      APP_UID: ${LOCAL_UID:-1000}
+      APP_GID: ${LOCAL_GID:-1000}
+  env_file: .env
+  volumes:
+    - .:/app
+    - private_data:/app/var
+    - static_data:/app/staticfiles
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sinau}
+      POSTGRES_USER: ${POSTGRES_USER:-sinau}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/init_local.py first}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: [redis-server, --appendonly, 'yes']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:v1.33.1
+    ports:
+      - '127.0.0.1:${MAILPIT_WEB_PORT:-8025}:8025'
+    restart: unless-stopped
+
+  web:
+    <<: *app
+    command: [sh, -c, 'python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000']
+    ports:
+      - '127.0.0.1:${WEB_PORT:-8000}:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/', timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      start_period: 60s
+      retries: 10
+
+  worker:
+    <<: *app
+    command: [celery, -A, config, worker, --loglevel=info, --concurrency=2]
+    depends_on:
+      web:
+        condition: service_healthy
+
+  beat:
+    <<: *app
+    command: [celery, -A, config, beat, --loglevel=info, --schedule=/app/var/celerybeat-schedule]
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  private_data:
+  static_data:
+  redis_data:

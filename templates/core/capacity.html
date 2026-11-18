@@ -1,0 +1,40 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Kapasitas & jadwal · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">JADWAL STAF & FASILITAS</p>
+<h1>Kapasitas layanan.</h1>
+<p>Booking, waktu pembersihan, dan penutupan jadwal menggunakan pengunci yang sama.</p>
+</div>
+</div>
+<div class="two-column">
+<section>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Sumber daya</th>
+<th>Periode</th>
+<th>Alokasi</th>
+</tr>
+</thead>
+<tbody>{% for rr in reservations %}<tr>
+<td>{{ rr.resource.name }}</td>
+<td>{{ rr.period.lower|date:'d M Y H:i' }}<span class="muted">s.d. {{ rr.period.upper|date:'d M Y H:i' }}</span>
+</td>
+<td>{{ rr.status }}{% if rr.booking_id %}<span class="muted"><a href="{% url 'booking_detail' rr.booking_id %}">{{ rr.booking.code }}</a></span>{% endif %}{% if rr.kind == 'BLOCK' and workspace_role != 'OWNER' %}<form method="post">{% csrf_token %}<input type="hidden" name="reservation" value="{{ rr.pk }}">
+<button class="text-link small" type="submit" name="action" value="release">Buka kembali</button>
+</form>{% endif %}</td>
+</tr>{% empty %}<tr>
+<td colspan="3">Belum ada reservasi aktif.</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+</section>{% if workspace_role != 'OWNER' %}<section class="panel">
+<h2>Tutup sementara / libur</h2>
+<form method="post" class="stack-form">{% csrf_token %}{% include 'includes_form.html' %}<button class="button" type="submit">Blok jadwal</button>
+</form>
+</section>{% endif %}</div>
+{% endblock %}
+

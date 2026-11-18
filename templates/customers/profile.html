@@ -1,0 +1,36 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Profil & kontak · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">AKUN SAYA</p>
+<h1>Profil & kontak</h1>
+<p>Informasi yang membantu kami menghubungi Anda saat dibutuhkan.</p>
+</div>
+</div>
+<div class="profile-grid">
+<section class="panel">
+<div class="profile-summary"><span class="avatar large">{{ request.user.full_name|initials }}</span>
+<div>
+<h2>{{ request.user.full_name }}</h2>
+<p>{{ request.user.email }}</p><span class="badge green">{% icon 'check' %} Email terverifikasi</span>
+</div>
+</div>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="profile">{% include 'includes_form.html' %}<button class="button" type="submit">Simpan perubahan</button>
+</form>
+</section>
+<section class="panel">
+<div class="panel-title">
+<h2>Kontak darurat</h2>{% icon 'heart' %}</div>
+<p class="small muted">Orang yang dapat dihubungi ketika hewan Anda membutuhkan penanganan segera.</p>{% for contact in contacts %}<div class="contact-row"><span class="avatar">{{ contact.name|initials }}</span>
+<div><strong>{{ contact.name }}</strong>
+<p>{{ contact.relationship }} · {{ contact.phone }}</p><small>{% if contact.contact_consent %}Bersedia dihubungi{% else %}Persetujuan belum diberikan{% endif %}</small>
+</div><form method="post" action="{% url 'emergency_delete' contact.pk %}" data-confirm="Hapus kontak darurat ini dari profil Anda? Kontak pada penitipan sebelumnya tetap tersimpan.">{% csrf_token %}<button type="submit" class="icon-button danger-text" aria-label="Hapus kontak {{ contact.name }}">{% icon 'trash' %}</button></form>
+</div>{% endfor %}<details class="block-form" {% if not contacts or emergency_form.errors %}open{% endif %}>
+<summary>{% icon 'plus' %} Tambah kontak darurat</summary>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="emergency">{% include 'includes_form.html' with form=emergency_form %}<button class="button secondary" type="submit">Simpan kontak</button>
+</form>
+</details>
+</section>
+</div>
+{% endblock %}

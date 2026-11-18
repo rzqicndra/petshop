@@ -1,0 +1,58 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}{{ order.code }} · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">RINCIAN PESANAN</p>
+<h1>{{ order.code }}</h1>
+<p>{{ order.created_at|date:'d F Y, H:i' }} · {{ order.get_fulfillment_display }}</p>
+</div><span class="badge {{ order.status|status_tone }}">{{ order.status|status_label }}</span>
+</div>
+<div class="detail-grid">
+<div>
+<section class="panel">
+<h2>Produk yang dipesan</h2>{% for item in items %}<div class="list-row">
+<div><strong>{{ item.product_name }}</strong>
+<p>{{ item.quantity }} × {{ item.unit_price_rp|rupiah }}</p>{% if order.status == 'COMPLETED' and not staff_workspace %}<a class="text-link small" href="{% url 'review' 'produk' item.pk %}">{% if item.review %}Edit ulasan{% else %}Tulis ulasan{% endif %} ☆</a>{% endif %}</div><span>{{ item.line_total_rp|rupiah }}</span>
+</div>{% endfor %}</section>{% if address %}<section class="panel">
+<h2>Alamat tujuan</h2>
+<p><strong>{{ address.recipient_name }}</strong><br>{{ address.recipient_phone }}</p>
+<p>{{ address.full_address }}<br>{{ address.region.district }}, {{ address.region.city }}, {{ address.region.province }} {{ address.region.postal_code }}</p>
+<p class="muted small">Titik tujuan: {{ address.latitude }}, {{ address.longitude }}</p>{% if address.delivery_note %}<p class="small">Catatan kurir: {{ address.delivery_note }}</p>{% endif %}</section>{% endif %}{% if shipments %}<section class="panel">
+<h2>Perjalanan pengiriman</h2>{% for shipment in shipments %}<div class="timeline-item"><span class="badge {{ shipment.status|status_tone }}">{{ shipment.status|status_label }}</span>
+<p>{{ shipment.quote.package_snapshot.label }}{% if shipment.tracking_code %}<br>Nomor pelacakan: {{ shipment.tracking_code }}{% endif %}</p>{% if can_operate %}<a class="text-link small" href="{% url 'shipment_detail' shipment.pk %}">Kelola pengiriman {% icon 'arrow' %}</a>{% endif %}</div>{% endfor %}</section>{% endif %}{% if order.status == 'NEEDS_ATTENTION' %}<div class="notice">Dana sudah tercatat, tetapi pesanan membutuhkan penanganan admin karena stok atau reservasi tidak dapat diaktifkan. Hubungi CS untuk penyelesaian atau refund.</div>{% endif %}</div>
+<div>
+<section class="panel">
+<h2>Ringkasan pembayaran</h2><dl class="detail-list">
+<div><dt>Subtotal</dt><dd>{{ order.subtotal_rp|rupiah }}</dd>
+</div>
+<div><dt>Pengiriman</dt><dd>{{ order.shipping_rp|rupiah }}</dd>
+</div>
+<div><dt>Pembayaran</dt><dd>{% if invoice|invoice_available %}{{ invoice.status|status_label }}{% else %}Belum diterbitkan{% endif %}</dd>
+</div></dl>
+<div class="price-total"><span>Total</span><strong>{{ order.total_rp|rupiah }}</strong>
+</div>{% if invoice|invoice_available %}<a class="button full" href="{% url 'invoice' invoice.pk %}">Buka tagihan {% icon 'arrow' %}</a>{% endif %}</section>{% if can_operate %}<section class="panel">
+<h2>Proses pesanan</h2>{% if order.status == 'PAID' %}<form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="pack">Barang selesai dikemas {% icon 'arrow' %}</button>
+</form>{% elif order.status == 'PACKED' and order.fulfillment == 'PICKUP' %}<p class="small muted">Periksa nomor pesanan dan catat nama penerima saat barang diserahkan.</p>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="handover">
+<div class="field">
+<label for="recipient-name">Nama penerima</label>
+<input id="recipient-name" name="recipient_name" required maxlength="150">
+</div>
+<button class="button" type="submit">Catat serah terima {% icon 'arrow' %}</button>
+</form>{% elif order.status == 'PACKED' and order.fulfillment == 'DELIVERY' %}<p class="small muted">Pemesanan kurir hanya dilakukan untuk barang yang sudah siap. Pengiriman berstatus belum pasti wajib direkonsiliasi.</p>
+<form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="ship">Proses pengiriman {% icon 'arrow' %}</button>
+</form>{% else %}<p class="muted small">Tindakan tersedia sesuai tahap pesanan.</p>{% endif %}</section>{% endif %}{% if order.status == 'AWAITING_PAYMENT' or can_operate and order.status == 'PAID' or can_operate and order.status == 'PACKED' or can_operate and order.status == 'NEEDS_ATTENTION' %}<section class="panel">
+<details>
+<summary>Batalkan pesanan</summary>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="cancel">
+<div class="field">
+<label for="cancel-reason">Alasan pembatalan</label><textarea id="cancel-reason" name="reason" required rows="3" maxlength="2000"></textarea>
+</div>
+<button class="button danger" type="submit">Batalkan pesanan</button>
+</form>
+</details>
+</section>{% endif %}</div>
+</div>
+{% endblock %}
+

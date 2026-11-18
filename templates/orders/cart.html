@@ -1,0 +1,40 @@
+{% extends 'base.html' %}{% load static sinau %}{% block title %}Keranjang · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<section class="shop-section">
+<div class="page-heading">
+<div>
+<p class="eyebrow">BELANJA KEBUTUHAN</p>
+<h1>Keranjang saya</h1>
+<p>Periksa produk pilihan sebelum melanjutkan.</p>
+</div><a class="text-link" href="{% url 'catalog' %}">Lanjut belanja {% icon 'arrow' %}</a>
+</div>
+<div class="checkout-steps"><span class="current">1. Keranjang</span><span>2. Pengiriman</span><span>3. Pembayaran</span>
+</div>
+<div class="detail-grid">
+<section class="panel cart-panel">{% for line in lines %}<article class="cart-row"><img src="{% if line.variant.image_file_id %}{% url 'product_image' line.variant.pk %}{% else %}{% static line.variant.image_path %}{% endif %}" alt="{{ line.variant.product.name }}">
+<div class="cart-product">
+<h3>{{ line.variant.product.name }}</h3>
+<p>{{ line.variant.label }}</p><strong>{{ line.variant.price_rp|rupiah }}</strong>
+</div>
+<form method="post" action="{% url 'cart_update' %}" class="cart-quantity">{% csrf_token %}<input type="hidden" name="variant" value="{{ line.variant.pk }}">
+<label class="sr-only" for="cart-qty-{{ line.variant.pk }}">Jumlah produk</label>
+<input id="cart-qty-{{ line.variant.pk }}" name="quantity" type="number" min="0" max="99" value="{{ line.quantity }}">
+<button type="submit" class="text-link small">Update</button>
+<button type="submit" name="quantity" value="0" class="icon-button danger-text" aria-label="Hapus {{ line.variant.product.name }}">{% icon 'trash' %}</button>
+</form><strong class="cart-line-total">{{ line.total|rupiah }}</strong>
+</article>{% empty %}<div class="empty-state">{% icon 'bag' %}<h3>Keranjang masih kosong.</h3>
+<p>Yuk, pilih kebutuhan favorit sahabat Anda.</p><a class="button" href="{% url 'catalog' %}">Mulai belanja {% icon 'arrow' %}</a>
+</div>{% endfor %}</section>
+<section class="panel order-summary">
+<h2>Ringkasan belanja</h2><dl class="detail-list">
+<div><dt>Subtotal produk</dt><dd>{{ total|rupiah }}</dd>
+</div>
+<div><dt>Pengiriman</dt><dd>Dihitung berikutnya</dd>
+</div></dl>
+<div class="price-total"><span>Subtotal</span><strong>{{ total|rupiah }}</strong>
+</div>{% if lines %}<a class="button full" href="{% url 'checkout' %}">Lanjut ke checkout {% icon 'arrow' %}</a>{% endif %}<p class="payment-assurance">{% icon 'shield' %} Harga dan ketersediaan diperiksa kembali saat checkout.</p>
+</section>
+</div>
+</section>
+{% endblock %}

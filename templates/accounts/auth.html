@@ -1,0 +1,24 @@
+{% extends 'base.html' %}{% load static sinau %}{% block title %}{{ button }} · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<section class="auth-layout auth-redesign {% if not site_content.auth %}auth-plain{% endif %}">
+{% if site_content.auth %}<div class="auth-art">{% content_image site_content.auth as auth_photo %}{% if auth_photo %}<img src="{{ auth_photo }}" alt="{{ site_content.auth.image_alt }}">{% endif %}
+<div class="auth-caption"><span class="eyebrow">{{ site_content.auth.overline }}</span>
+<h2>{{ site_content.auth.heading|linebreaksbr }}</h2>
+<p>{{ site_content.auth.body|linebreaksbr }}</p>
+</div>
+</div>{% endif %}
+<div class="auth-form-wrap"><a class="auth-wordmark" href="{% url 'home' %}">{% if store_settings.logo_file_id %}<img src="{% url 'site_image' store_settings.logo_file_id %}" alt="" width="32" height="32">{% else %}{% icon 'paw' %}{% endif %} {{ store_settings.business_name|default:'Sinau Satwa' }}</a>
+<div class="auth-heading">
+<p class="eyebrow">{% if mode == 'otp' %}VERIFIKASI EMAIL{% elif mode == 'forgot' or mode == 'reset' %}PEMULIHAN AKUN{% else %}SELAMAT DATANG{% endif %}</p>
+<h1>{{ title }}</h1>
+<p>{% if mode == 'otp' %}Cek inbox atau folder spam. Masukkan 6 digit kode yang kami kirim; berlaku selama 5 menit.{% elif mode == 'login' %}Login untuk mengatur jadwal, belanja, dan melihat kabar hewan Anda.{% elif mode == 'register' %}Buat akun untuk mulai merawat dengan lebih mudah.{% else %}Kami membantu Anda mendapatkan kembali akses akun dengan aman.{% endif %}</p>
+</div>
+<form method="post" class="stack-form auth-form">{% csrf_token %}{% include 'includes_form.html' %}<button class="button full" type="submit">{{ button }} {% icon 'arrow' %}</button>
+</form>{% if mode == 'login' %}<a class="auth-forgot text-link" href="{% url 'forgot_password' %}">Forgot password?</a>{% endif %}{% if google_enabled and mode == 'login' or google_enabled and mode == 'register' %}<div class="divider-text">atau</div><a class="button google-button full" href="{% url 'google_start' %}"><span class="google-symbol">{% icon 'google' %}</span><span>Lanjutkan dengan Google</span></a>{% endif %}{% if mode == 'login' %}<p class="auth-foot">Belum punya akun? <a href="{% url 'register' %}">Register</a>
+</p>{% elif mode == 'otp' %}<form method="post" action="{% url 'resend_otp' %}" class="auth-foot">{% csrf_token %}<span>Belum menerima kode?</span> <button class="text-link" type="submit">Kirim ulang</button>
+</form>{% else %}<p class="auth-foot">Sudah punya akun? <a href="{% url 'login' %}">Login</a>
+</p>{% endif %}<p class="auth-security">{% icon 'lock' %} Data Anda dilindungi dan hanya digunakan untuk layanan Sinau Satwa.</p>
+</div>
+</section>
+{% endblock %}

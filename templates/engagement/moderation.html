@@ -1,0 +1,27 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Ulasan pelanggan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">PENGALAMAN PELANGGAN</p>
+<h1>Ulasan pelanggan.</h1>
+<p>Keputusan moderasi wajib beralasan. Ulasan negatif yang sah tetap ditampilkan.</p>
+</div>
+</div>{% for review in reviews %}<section class="panel">
+<div class="panel-title">
+<h2>{{ review.customer.name }} · {{ review.rating }}/5</h2><span class="badge {{ review.status|status_tone }}">{{ review.status|status_label }}</span>
+</div>
+<p>{{ review.comment|linebreaksbr }}</p><small class="verified">✓ Transaksi selesai terverifikasi</small>{% if workspace_role != 'OWNER' %}<details>
+<summary>Moderasi ulasan</summary>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="review" value="{{ review.pk }}">
+<div class="field">
+<label for="reason-{{ review.pk }}">Alasan keputusan</label><textarea id="reason-{{ review.pk }}" name="reason" required rows="2" maxlength="2000"></textarea>
+</div>
+<div class="actions">
+<button class="button secondary small" type="submit" name="action" value="publish">Tampilkan</button>
+<button class="button danger small" type="submit" name="action" value="hide">Sembunyikan</button>
+</div>
+</form>
+</details>{% endif %}</section>{% empty %}<div class="empty-state">Belum ada ulasan pelanggan.</div>{% endfor %}
+{% endblock %}
+

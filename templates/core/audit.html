@@ -1,0 +1,63 @@
+{% extends 'base.html' %}{% block title %}Audit & notifikasi · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">JEJAK AKTIVITAS</p>
+<h1>Audit & notifikasi.</h1>
+<p>Perubahan penting dicatat tanpa menyimpan password, OTP, atau token Login.</p>
+</div>
+</div>{% if outbox_attention %}<section class="panel">
+<h2>Pengiriman perlu ditinjau</h2>
+<p class="muted small">Status UNKNOWN berarti hasil pengiriman belum pasti. Jangan mengirim ulang secara buta; periksa penyedia atau terbitkan OTP baru jika diminta pemilik akun.</p>{% for event in outbox_attention %}<div class="list-row"><strong>{{ event.topic }}</strong><span class="badge amber">{{ event.status }}</span>
+</div>{% endfor %}</section>{% endif %}<div class="section-heading">
+<h2>Riwayat perubahan</h2>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Waktu</th>
+<th>Pelaksana</th>
+<th>Tindakan</th>
+<th>Objek</th>
+<th>Alasan</th>
+</tr>
+</thead>
+<tbody>{% for log in logs %}<tr>
+<td>{{ log.occurred_at|date:'d M Y H:i:s' }}</td>
+<td>{{ log.actor.full_name|default:'Sistem' }}</td>
+<td>{{ log.action }}</td>
+<td>{{ log.aggregate_type }}<span class="muted">{{ log.aggregate_id }}</span>
+</td>
+<td>{{ log.reason|default:'—' }}</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+<div class="section-heading">
+<h2>Pengiriman notifikasi</h2>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Waktu</th>
+<th>Penerima</th>
+<th>Kanal</th>
+<th>Status</th>
+<th>Percobaan</th>
+</tr>
+</thead>
+<tbody>{% for notification in notifications %}<tr>
+<td>{{ notification.created_at|date:'d M Y H:i' }}</td>
+<td>{{ notification.user.email }}</td>
+<td>{{ notification.channel }}</td>
+<td>{{ notification.status }}</td>
+<td>{{ notification.attempt_count }}</td>
+</tr>{% empty %}<tr>
+<td colspan="5">Belum ada notifikasi.</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+{% endblock %}
+

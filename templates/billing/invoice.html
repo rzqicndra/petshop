@@ -1,0 +1,47 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Detail pembayaran · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">{% if staff_workspace %}RINCIAN TRANSAKSI{% else %}PEMBAYARAN{% endif %}</p>
+<h1>Detail tagihan</h1>
+<p>{{ invoice.code }} · {{ invoice.customer.name }}</p>
+</div><span class="badge {{ invoice.status|status_tone }}">{{ invoice.status|status_label }}</span>
+</div>
+<div class="detail-grid">
+<section class="panel">
+<div class="panel-title">
+<h2>Ringkasan tagihan</h2>{% icon 'file' %}</div><dl class="detail-list">
+<div><dt>Nomor tagihan</dt><dd>{{ invoice.code }}</dd>
+</div>
+<div><dt>Diterbitkan</dt><dd>{{ invoice.created_at|date:'d M Y, H:i' }}</dd>
+</div>{% if invoice.status == 'UNPAID' %}<div><dt>Bayar sebelum</dt><dd>{{ invoice.expires_at|date:'d M Y, H:i' }}</dd>
+</div>{% endif %}</dl>
+<div class="price-total"><span>Total pembayaran</span><strong>{{ invoice.total_rp|rupiah }}</strong>
+</div>{% if not staff_workspace and invoice.status == 'UNPAID' %}<div data-invoice-poll="{% url 'invoice_status' invoice.pk %}" data-invoice-status="{{ invoice.status }}">
+</div>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="pay">
+<input type="hidden" name="key" value="{{ key }}">
+<button class="button full" type="submit">{% icon 'lock' %} Bayar sekarang</button>
+</form>
+<p class="payment-assurance">{% icon 'shield' %} Pembayaran diproses dengan aman. Status diperbarui otomatis.</p>{% endif %}{% if invoice.order_id %}<a class="text-link" href="{% url 'order_detail' invoice.order_id %}">Lihat pesanan {% icon 'arrow' %}</a>{% elif invoice.booking_id %}<a class="text-link" href="{% url 'booking_detail' invoice.booking_id %}">Lihat booking {% icon 'arrow' %}</a>{% endif %}{% if can_operate and invoice.status == 'UNPAID' %}<details class="block-form">
+<summary>Catat pembayaran di kasir</summary>
+<p class="small muted">Gunakan setelah dana tunai diterima. Transaksi online dicatat otomatis.</p>
+<form method="post" data-confirm="Konfirmasi dana tunai sudah diterima sesuai total tagihan?">{% csrf_token %}<input type="hidden" name="action" value="cash">
+<input type="hidden" name="key" value="cash:{{ key }}">
+<button class="button secondary" type="submit">Catat dana tunai diterima</button>
+</form>
+</details>{% endif %}</section>
+<section class="panel">
+<h2>Riwayat pembayaran</h2>{% for payment in payments %}<div class="payment-record"><span class="master-icon">{% icon 'check' %}</span>
+<div><strong>{{ payment.amount_rp|rupiah }}</strong>
+<p>{{ payment.provider|payment_label }} · {{ payment.settled_at|date:'d M Y, H:i' }}</p><span class="badge green">Diterima</span>
+</div>
+</div>{% empty %}<div class="empty-state compact">{% icon 'clock' %}<h3>Menunggu pembayaran</h3>
+<p>Pembayaran akan muncul di sini setelah berhasil dikonfirmasi.</p>
+</div>{% endfor %}{% for attempt in attempts %}{% if attempt.provider == 'MOCK' and not staff_workspace and payment_mode == 'mock' and attempt.status == 'PENDING' %}<form method="post" class="block-form">{% csrf_token %}<input type="hidden" name="action" value="simulate">
+<input type="hidden" name="attempt" value="{{ attempt.pk }}">
+<button class="button secondary small" type="submit">Selesaikan pembayaran uji</button>
+</form>{% endif %}{% endfor %}</section>
+</div>
+{% endblock %}

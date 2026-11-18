@@ -1,0 +1,19 @@
+{% extends 'base.html' %}{% block title %}Tulis ulasan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">PENGALAMAN ANDA</p>
+<h1>Bagikan ceritanya.</h1>
+<p>Ulasan ditautkan ke transaksi selesai milik Anda.</p>
+</div>
+</div>
+<section class="panel narrow">
+<h2>Bagaimana pengalaman Anda?</h2>
+<p class="muted small">{{ target }}</p>
+<form method="post" class="stack-form">{% csrf_token %}{% include 'includes_form.html' %}<button class="button" type="submit">Simpan ulasan ☆</button>
+</form>
+<p class="banner-note">Jangan masukkan nomor telepon, alamat rumah, atau informasi medis pribadi ke dalam ulasan publik.</p>
+</section>
+{% endblock %}
+

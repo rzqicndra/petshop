@@ -1,0 +1,48 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Akun & peran · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">SUPER ADMIN / AKSES</p>
+<h1>Pengguna & akses.</h1>
+<p>Satu Login. Peran diberikan oleh Super Admin dan diperiksa oleh server.</p>
+</div>
+</div>
+<div class="two-column">
+<section>
+<form method="get" class="search-field">
+<input name="q" value="{{ request.GET.q }}" placeholder="Cari nama pengguna..." aria-label="Cari nama pengguna">
+<button class="button small" type="submit">Cari</button>
+</form>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Akun</th>
+<th>Peran & status</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody>{% for user in staff_users %}<tr>
+<td>{{ user.full_name }}<span class="muted">{{ user.email }}</span>
+</td>
+<td>{% for group in user.groups.all %}<span class="badge">{{ group.name }}</span>{% endfor %}<span class="muted">{% if user.is_active %}Aktif{% else %}Nonaktif{% endif %} · {% if user.email_verified_at %}Email terverifikasi{% else %}Menunggu verifikasi{% endif %}</span>
+</td>
+<td><a href="?edit={{ user.pk }}">Edit {% icon 'arrow' %}</a>{% if not user.email_verified_at and user.is_active %}<form method="post" class="block-form">{% csrf_token %}<input type="hidden" name="user" value="{{ user.pk }}">
+<button class="text-link small" type="submit" name="action" value="resend_invite">Kirim undangan</button>
+</form>{% endif %}</td>
+</tr>{% empty %}<tr>
+<td colspan="3">Belum ada pengguna.</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>{% include 'pagination.html' %}<div class="notice info">Mengubah peran atau status akun mencabut sesi sebelumnya. Super Admin aktif terakhir tidak dapat dinonaktifkan.</div>
+</section>
+<section class="panel">
+<h2>{% if editing %}Edit akses {{ editing.full_name }}{% else %}Tambah akun / atur peran{% endif %}</h2>
+<form method="post" class="stack-form">{% csrf_token %}{% include 'includes_form.html' %}<button class="button" type="submit">Simpan akun & peran {% icon 'arrow' %}</button>
+</form>
+<p class="banner-note">Email baru menerima OTP dan tautan undangan. Akun lama dapat diberi peran tambahan secara eksplisit.</p>
+</section>
+</div>
+{% endblock %}
+

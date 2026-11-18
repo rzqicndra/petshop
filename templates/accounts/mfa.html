@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Verifikasi keamanan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<section class="narrow panel auth-narrow">
+<p class="eyebrow">KEAMANAN AKUN</p>
+<h1>Konfirmasi Login.</h1>
+<p>Masukkan kode dari aplikasi autentikator atau salah satu kode pemulihan Anda.</p>{% if error %}<div class="message error">{{ error }}</div>{% endif %}<form method="post" class="stack-form">{% csrf_token %}<div class="field">
+<label for="mfa-code">Kode autentikator / pemulihan</label>
+<input id="mfa-code" name="code" autocomplete="one-time-code" required maxlength="20">
+</div>
+<button class="button" type="submit">Verifikasi Login {% icon 'arrow' %}</button>
+</form>
+</section>
+{% endblock %}
+

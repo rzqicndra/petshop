@@ -1,0 +1,37 @@
+{% extends 'base.html' %}{% load sinau %}{% block title %}Pelanggan datang langsung · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">RESEPSIONIS / PELANGGAN</p>
+<h1>Datang langsung,<br>tetap tercatat.</h1>
+<p>Pelanggan tanpa akun dapat dilayani. Nama dan nomor telepon tidak menggabungkan akun secara otomatis.</p>
+</div>
+</div>
+<div class="two-column">
+<section class="panel">
+<h2>Pilih pelanggan</h2>
+<form method="get" class="stack-form">
+<div class="field">
+<label for="walkin-customer">Pelanggan terdaftar</label><select id="walkin-customer" name="customer" required><option value="">Pilih pelanggan</option>{% for customer in customers %}<option value="{{ customer.pk }}" {% if selected_customer.pk == customer.pk %}selected{% endif %}>{{ customer.name }} · {{ customer.phone|default:'Tanpa nomor' }}</option>{% endfor %}</select>
+</div>
+<button type="submit" class="button secondary">Buka profil {% icon 'arrow' %}</button>
+</form>{% if workspace_role != 'OWNER' %}<details>
+<summary>Daftarkan pelanggan datang langsung</summary>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="customer">{% include 'includes_form.html' with form=customer_form %}<button class="button" type="submit">Simpan pelanggan</button>
+</form>
+</details>{% endif %}{% if selected_customer %}<hr>
+<h3>{{ selected_customer.name }}</h3>{% for pet in pets %}<div class="list-row"><strong>{{ pet.name }}</strong><span>{{ pet.species.name }}</span>
+</div>{% empty %}<p class="small muted">Belum ada profil hewan.</p>{% endfor %}{% if workspace_role != 'OWNER' %}<details>
+<summary>Tambah hewan pelanggan</summary>
+<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="pet">
+<input type="hidden" name="customer" value="{{ selected_customer.pk }}">{% include 'includes_form.html' with form=pet_form %}<button class="button secondary" type="submit">Simpan hewan</button>
+</form>
+</details>{% endif %}{% endif %}</section>
+<section class="panel">
+<h2>Booking datang langsung</h2>{% if selected_customer and workspace_role != 'OWNER' %}<form method="post" enctype="multipart/form-data" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="booking">
+<input type="hidden" name="customer" value="{{ selected_customer.pk }}">{% include 'includes_form.html' with form=booking_form %}<button class="button" type="submit">Buat Booking {% icon 'arrow' %}</button>
+</form>{% else %}<p class="muted">Pilih pelanggan untuk melanjutkan. Workspace Owner memiliki akses lihat.</p>{% endif %}</section>
+</div>
+{% endblock %}
+

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% load static sinau %}{% block title %}Layanan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<section class="public-section">
+{% if site_content.service_page %}<div class="editorial-heading"><p class="eyebrow">{{ site_content.service_page.overline }}</p><h1>{{ site_content.service_page.heading|linebreaksbr }}</h1><p>{{ site_content.service_page.body|linebreaksbr }}</p></div>{% endif %}
+<div class="service-grid">{% for package in packages %}<article class="service-card">{% service_image package.service as image %}<img src="{{ image }}" alt="{{ package.service.name }}" loading="lazy">
+<div>
+<p class="eyebrow">{{ package.service.get_kind_display }}</p>
+<h3>{{ package.name }}</h3>{% if package.service.kind == 'BOARDING' %}<p>Tarif dihitung berdasarkan unit dan lama menginap. Pengajuan ditinjau sebelum pembayaran.</p>{% else %}<p>{{ package.duration_minutes }} menit · {{ package.price_rp|rupiah }}</p>{% endif %}<a class="button secondary small" href="{% url 'new_booking' %}?paket={{ package.pk }}">{% if package.service.kind == 'BOARDING' %}Ajukan penitipan{% else %}Booking layanan{% endif %} {% icon 'arrow' %}</a>
+</div>
+</article>{% empty %}<div class="empty-state">Layanan sedang dipersiapkan.</div>{% endfor %}</div>
+</section>
+{% endblock %}
+

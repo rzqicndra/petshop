@@ -1,0 +1,80 @@
+{% extends 'base.html' %}{% load sinau l10n %}{% block title %}Pengiriman · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<div class="page-heading">
+<div>
+<p class="eyebrow">PELAKSANAAN PENGANTARAN</p>
+<h1>{% if shipment %}Rincian kiriman.{% else %}Pengiriman.{% endif %}</h1>
+<p>Penugasan, pelacakan, dan bukti serah terima.</p>
+</div>
+</div>{% if shipment %}<div class="detail-grid">
+<section class="panel">
+<h2>{{ shipment.order.code }}</h2><span class="badge {{ shipment.status|status_tone }}">{{ shipment.status|status_label }}</span><hr>
+<h3>Penerima</h3>
+<p>{{ address.recipient_name }} · {{ address.recipient_phone }}</p>
+<p>{{ address.full_address }}<br>{{ address.region.district }}, {{ address.region.city }} {{ address.region.postal_code }}</p>
+<p>{{ address.delivery_note }}</p><a class="text-link small" href="https://www.google.com/maps/search/?api=1&query={{ address.latitude|unlocalize }},{{ address.longitude|unlocalize }}" target="_blank" rel="noopener noreferrer">Buka titik tujuan Google Maps {% icon 'arrow' %}</a><hr><dl class="detail-list">
+<div><dt>Metode</dt><dd>{{ shipment.quote.package_snapshot.label }}</dd>
+</div>
+<div><dt>Jadwal</dt><dd>{% if shipment.quote.window %}{{ shipment.quote.window.starts_at|date:'d M Y H:i' }} — {{ shipment.quote.window.ends_at|date:'H:i' }}{% else %}Instan{% endif %}</dd>
+</div>
+<div><dt>Tracking</dt><dd>{{ shipment.tracking_code|default:'Belum tersedia' }}</dd>
+</div>
+<div><dt>Petugas</dt><dd>{{ assignment.courier_user.full_name|default:'Belum ditugaskan' }}</dd>
+</div></dl>{% if assignment.proof_file %}<a class="text-link small" href="{% url 'file_download' assignment.proof_file_id %}">Unduh bukti serah terima {% icon 'file' %}</a>{% endif %}</section>
+<section class="panel">
+<h2>Tindakan pengiriman</h2>{% if can_operate and shipment.status == 'ON_HOLD' and not shipment.provider_shipment_id and shipment.actual_fee_rp != None %}<div class="notice"><strong>Tarif dispatch berubah.</strong>
+<p>Dibayar pelanggan: {{ shipment.quote.fee_rp|rupiah }}. Biaya aktual: {{ shipment.actual_fee_rp|rupiah }}. Persetujuan berikut mencatat selisih sebagai biaya toko; tagihan pelanggan tidak diubah.</p>
+</div>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="approve_cost">
+<div class="field">
+<label for="cost-reason">Alasan persetujuan biaya toko</label><textarea id="cost-reason" name="reason" required maxlength="2000" rows="3"></textarea>
+</div>
+<button class="button" type="submit">Setujui biaya & pesan kurir</button>
+</form>{% endif %}{% if can_operate and shipment.method == 'INTERNAL' %}<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="assign">
+<div class="field">
+<label for="courier">Kurir karyawan</label><select id="courier" name="courier" required><option value="">Pilih karyawan</option>{% for courier in couriers %}<option value="{{ courier.pk }}">{{ courier.full_name }}</option>{% endfor %}</select>
+</div>
+<button class="button" type="submit">Tetapkan petugas {% icon 'arrow' %}</button>
+</form>{% endif %}{% if assignment.courier_user_id == request.user.pk and shipment.status == 'ALLOCATED' %}<form method="post" class="block-form">{% csrf_token %}<button type="submit" name="action" value="start_internal" class="button">Mulai pengantaran {% icon 'arrow' %}</button>
+</form>{% endif %}{% if assignment.courier_user_id == request.user.pk and shipment.status == 'IN_TRANSIT' and not assignment.completed_at %}<form method="post" enctype="multipart/form-data" class="stack-form block-form">{% csrf_token %}<input type="hidden" name="action" value="delivered">
+<div class="field">
+<label for="recipient">Nama penerima aktual</label>
+<input id="recipient" name="recipient_name" required maxlength="150">
+</div>
+<div class="field">
+<label for="proof">Bukti serah terima (foto / PDF)</label>
+<input id="proof" name="file" type="file" required accept="image/jpeg,image/png,application/pdf">
+</div>
+<button class="button" type="submit">Catat diterima pelanggan {% icon 'arrow' %}</button>
+</form>{% endif %}{% if can_operate and shipment.provider == 'MOCK' and local_mode %}<form method="post" class="block-form">{% csrf_token %}<button class="button secondary" type="submit" name="action" value="mock_delivered">Simulasikan kurir selesai</button>
+</form>{% elif can_operate and shipment.provider == 'BITESHIP' %}<form method="post" class="block-form">{% csrf_token %}<button class="button secondary" type="submit" name="action" value="reconcile">Rekonsiliasi ke Biteship {% icon 'arrow' %}</button>
+</form>
+<p class="banner-note">Respons belum pasti tetap memakai referensi yang sama. Jangan memesan kurir kedua untuk pengiriman yang belum jelas.</p>{% endif %}</section>
+</div>{% else %}<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Pesanan</th>
+<th>Metode</th>
+<th>Status</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>{% for item in shipments %}<tr>
+<td>{{ item.order.code }}<span class="muted">{{ item.order.customer.name }}</span>
+</td>
+<td>{{ item.quote.package_snapshot.label }}</td>
+<td><span class="badge {{ item.status|status_tone }}">{{ item.status|status_label }}</span>
+</td>
+<td><a href="{% url 'shipment_detail' item.pk %}">Lihat {% icon 'arrow' %}</a>
+</td>
+</tr>{% empty %}<tr>
+<td colspan="4">
+<div class="empty-state">Belum ada pengiriman dalam akses Anda.</div>
+</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>{% endif %}
+{% endblock %}
+

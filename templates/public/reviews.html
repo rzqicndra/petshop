@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}Cerita pelanggan · {{ store_settings.business_name|default:"Sinau Satwa" }}
+{% endblock %}
+{% block content %}
+<section class="public-section">
+{% if site_content.reviews %}<div class="editorial-heading"><p class="eyebrow">{{ site_content.reviews.overline }}</p><h1>{{ site_content.reviews.heading|linebreaksbr }}</h1><p>{{ site_content.reviews.body|linebreaksbr }}</p></div>{% endif %}
+<div class="three-column">{% for review in reviews %}{% include 'public/review_card.html' %}{% empty %}<div class="empty-state">Belum ada ulasan. Ulasan dapat ditulis melalui detail transaksi setelah selesai.</div>{% endfor %}</div>
+</section>
+{% endblock %}
+
