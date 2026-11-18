@@ -147,29 +147,45 @@ def create_booking(
 ):
     require_role(actor, OPS | {"CUSTOMER"})
     customer = customer or customer_for(actor)
+
     if active_role(actor) == "CUSTOMER" and customer.user_id != actor.pk:
         raise BusinessError("Pelanggan tidak sesuai dengan akun.")
+
     if pet.customer_id != customer.pk or not pet.is_active:
         raise BusinessError("Hewan tidak tersedia pada profil pelanggan ini.")
+
     package = ServicePackage.objects.select_related("service").get(
-        pk=package.pk, is_active=True, service__is_active=True
+        pk=package.pk,
+        is_active=True,
+        service__is_active=True,
     )
+
     if not PackageSpecies.objects.filter(
-        package=package, species=pet.species, species__is_active=True
+        package=package,
+        species=pet.species,
+        species__is_active=True,
     ).exists():
         raise BusinessError("Paket tidak sesuai dengan jenis hewan.")
+
     kind = package.service.kind
+
     if kind == "BOARDING":
         ends_at = checkout_at
         if not ends_at or ends_at - starts_at < timedelta(hours=12):
             raise BusinessError("Penitipan minimal 12 jam. Tentukan waktu jemput.")
+
         if not emergency or not emergency.get("phone") or not emergency.get("consent"):
-            raise BusinessError("Kontak darurat dan persetujuan kontak diperlukan untuk penitipan.")
+            raise BusinessError(
+                "Kontak darurat dan persetujuan kontak diperlukan untuk penitipan."
+            )
     else:
         if not package.duration_minutes or not package.price_rp or package.price_rp < 0:
             raise BusinessError("Paket layanan belum lengkap.")
+
         ends_at = starts_at + timedelta(minutes=package.duration_minutes)
+
     validate_time(starts_at, ends_at, kind)
+
     try:
         with commerce_transaction():
             record, created = idempotent(
@@ -185,12 +201,31 @@ def create_booking(
                     "emergency": emergency,
                 },
             )
+
             if not created and record.result_reference:
                 return Booking.objects.get(pk=record.result_reference["id"])
+
             expire_capacity_holds()
-            Pet.objects.select_for_update().get(pk=pet.pk)
+
+            # Baca ulang dan kunci data hewan sebelum membuat booking.
+            pet = Pet.objects.select_for_update().get(pk=pet.pk)
+
+            if not pet.is_active or pet.customer_id != customer.pk:
+                raise BusinessError(
+                    "Hewan sudah dihapus atau profilnya berubah. "
+                    "Pilih profil yang masih aktif."
+                )
+
+            if not PackageSpecies.objects.filter(
+                package=package,
+                species=pet.species,
+                species__is_active=True,
+            ).exists():
+                raise BusinessError("Jenis hewan berubah. Pilih paket yang sesuai.")
+
             status = "SUBMITTED" if kind == "BOARDING" else "AWAITING_PAYMENT"
             expiry = None if kind == "BOARDING" else timezone.now() + timedelta(minutes=15)
+
             booking = Booking.objects.create(
                 customer=customer,
                 pet=pet,
@@ -205,8 +240,12 @@ def create_booking(
                 expires_at=expiry,
                 created_by=actor,
                 version=1,
-                policy_snapshot={"buffer_minutes": package.buffer_minutes, "notes": notes},
+                policy_snapshot={
+                    "buffer_minutes": package.buffer_minutes,
+                    "notes": notes,
+                },
             )
+
             if kind == "BOARDING":
                 from boarding.models import BoardingStay
 
@@ -219,23 +258,46 @@ def create_booking(
                 )
             else:
                 selected = allocate(package, booking, expiry)
-                staff = next((r.staff_user for r in selected if r.kind == "STAFF"), None)
+                staff = next(
+                    (r.staff_user for r in selected if r.kind == "STAFF"),
+                    None,
+                )
+
                 from care.models import Visit, GroomingJob
 
                 if kind == "VET":
                     Visit.objects.create(booking=booking, doctor=staff)
                 else:
                     GroomingJob.objects.create(booking=booking, groomer=staff)
+
                 from billing.services import issue_invoice
 
-                issue_invoice(booking, customer, booking.price_snapshot_rp, package.name, expiry)
-            audit(actor, "booking.created", booking, after={"status": booking.status, "kind": kind})
-            emit(
-                "booking.created", booking, {"customer_id": str(customer.pk), "code": booking.code}
+                issue_invoice(
+                    booking,
+                    customer,
+                    booking.price_snapshot_rp,
+                    package.name,
+                    expiry,
+                )
+
+            audit(
+                actor,
+                "booking.created",
+                booking,
+                after={"status": booking.status, "kind": kind},
             )
+
+            emit(
+                "booking.created",
+                booking,
+                {"customer_id": str(customer.pk), "code": booking.code},
+            )
+
             record.status, record.result_reference = "DONE", {"id": str(booking.pk)}
             record.save()
+
             return booking
+
     except IntegrityError:
         raise BusinessError("Jadwal hewan atau sumber daya bentrok. Pilih jadwal lain.")
 
