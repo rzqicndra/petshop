@@ -1,31 +1,49 @@
 name: Test Sinau Satwa
+
 on:
   push:
     branches: [main]
   pull_request:
+
 permissions:
   contents: read
+
 jobs:
   postgres-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
       - name: Generate isolated local configuration
-        run: python3 scripts/init_local.py
+        run: |
+          python3 scripts/init_local.py
+          echo "LOCAL_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "LOCAL_GID=$(id -g)" >> "$GITHUB_ENV"
+
       - name: Start application and PostgreSQL 17
-        run: docker compose up -d --build --wait
+        run: docker compose up -d --build --wait --wait-timeout 240
+
       - name: Verify schema and application
         run: |
           docker compose exec -T web python manage.py check
           docker compose exec -T web python manage.py makemigrations --check --dry-run
           docker compose exec -T web python manage.py test tests --noinput -v 2
+
       - name: Dependency audit
         run: |
-          docker compose exec -T web pip install pip-audit==2.10.1
-          docker compose exec -T web pip-audit --disable-pip --no-deps -r requirements.lock
+          docker compose exec -T web python -m pip install --user pip-audit==2.10.1
+          docker compose exec -T web python -m pip_audit --disable-pip --no-deps -r requirements.lock
+
+      - name: Show container diagnostics on failure
+        if: failure()
+        run: |
+          docker compose ps -a
+          docker compose logs --no-color --tail=200 web db redis worker beat
+
       - name: Stop containers
         if: always()
         run: docker compose down
