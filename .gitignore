@@ -33,3 +33,4 @@ node_modules/
 .DS_Store
 Thumbs.db
 # Keep migrations, example environment, assets, and licenses tracked.
+github-actions-error.txt
