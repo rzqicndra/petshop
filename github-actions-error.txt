@@ -1,0 +1,252 @@
+postgres-tests	Verify schema and application	﻿2026-11-18T03:53:51.6116985Z ##[group]Run docker compose exec -T web python manage.py check
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6117828Z ^[[36;1mdocker compose exec -T web python manage.py check^[[0m
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6118884Z ^[[36;1mdocker compose exec -T web python manage.py makemigrations --check --dry-run^[[0m
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6119868Z ^[[36;1mdocker compose exec -T web python manage.py test tests --noinput -v 2^[[0m
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6167804Z shell: /usr/bin/bash -e {0}
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6168564Z env:
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6168975Z   LOCAL_UID: 1001
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6169424Z   LOCAL_GID: 1001
+postgres-tests	Verify schema and application	2026-11-18T03:53:51.6169869Z ##[endgroup]
+postgres-tests	Verify schema and application	2026-11-18T03:53:53.1865175Z System check identified no issues (0 silenced).
+postgres-tests	Verify schema and application	2026-11-18T03:53:54.7831180Z No changes detected
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.1896715Z Found 165 test(s).
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.1898339Z Creating test database for alias 'default' ('test_sinau')...
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3848568Z Operations to perform:
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3849451Z   Synchronize unmigrated apps: messages, postgres, staticfiles
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3851331Z   Apply all migrations: accounts, admin, auth, billing, boarding, care, catalog, contenttypes, core, customers, delivery, engagement, inventory, orders, scheduling, sessions
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3856422Z Synchronizing apps without migrations:
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3863586Z   Creating tables...
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3864189Z     Running deferred SQL...
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3864691Z Running migrations:
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3958441Z   Applying contenttypes.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.3995409Z   Applying contenttypes.0002_remove_content_type_name... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4150126Z   Applying auth.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4182541Z   Applying auth.0002_alter_permission_name_max_length... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4218580Z   Applying auth.0003_alter_user_email_max_length... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4253460Z   Applying auth.0004_alter_user_username_opts... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4289635Z   Applying auth.0005_alter_user_last_login_null... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4387237Z   Applying auth.0006_require_contenttypes_0002... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4422873Z   Applying auth.0007_alter_validators_add_error_messages... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4470498Z   Applying auth.0008_alter_user_username_max_length... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4504294Z   Applying auth.0009_alter_user_last_name_max_length... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4541442Z   Applying auth.0010_alter_group_name_max_length... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4575279Z   Applying auth.0011_update_proxy_permissions... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.4610264Z   Applying auth.0012_alter_user_first_name_max_length... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.5144155Z   Applying accounts.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.5250892Z   Applying admin.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.5318111Z   Applying admin.0002_logentry_remove_auto_add... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.5384969Z   Applying admin.0003_logentry_add_action_flag_choices... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.5599673Z   Applying core.0000_enable_btree_gist... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.6309964Z   Applying core.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.6587319Z   Applying delivery.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.6906281Z   Applying catalog.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.7466018Z   Applying customers.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.8563831Z   Applying orders.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:56.8904991Z   Applying boarding.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:57.1031363Z   Applying scheduling.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:57.5634435Z   Applying boarding.0002_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:57.5818399Z   Applying billing.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:57.7362765Z   Applying billing.0002_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.2160560Z   Applying billing.0003_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.2593320Z   Applying billing.0004_payment_environment... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.2794162Z   Applying boarding.0003_boardingintakefile_is_active... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.5401058Z   Applying care.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.5425417Z   Applying core.0002_immutable_records... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.7028561Z   Applying core.0003_storesettings_cs_label_storesettings_footer_text_and_more... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.7435647Z   Applying catalog.0002_productvariant_image_file... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.8142885Z   Applying catalog.0003_category_image_file_species_image_file... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.8291395Z   Applying scheduling.0002_servicepackage_package_positive_price_and_more... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.8693361Z   Applying scheduling.0003_service_description_service_image_file... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.9213545Z   Applying core.0004_initial_site_content... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.9313488Z   Applying customers.0002_address_is_active... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:58.9515720Z   Applying customers.0003_emergencycontact_is_active... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:59.3785434Z   Applying delivery.0002_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:59.4402241Z   Applying delivery.0003_shipment_actual_fee_rp_shipment_cost_approval_reason_and_more... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:59.4448150Z   Applying delivery.0004_routeestimate... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:59.4676363Z   Applying delivery.0005_quote_origin... OK
+postgres-tests	Verify schema and application	2026-11-18T03:53:59.8634121Z   Applying engagement.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.0555846Z   Applying inventory.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.0857730Z   Applying orders.0002_order_cart_fingerprint... OK
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.0902949Z   Applying sessions.0001_initial... OK
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.4607826Z System check identified no issues (0 silenced).
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.5802977Z test_401_can_retry_and_ambiguous_timeout_cannot (tests.test_audit_regressions.AuditRegressionTests.test_401_can_retry_and_ambiguous_timeout_cannot) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.5898722Z test_approved_store_rejects_missing_origin_and_bad_contact (tests.test_audit_regressions.AuditRegressionTests.test_approved_store_rejects_missing_origin_and_bad_contact) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.5939094Z test_bad_timezone_hours_and_coordinates_rejected (tests.test_audit_regressions.AuditRegressionTests.test_bad_timezone_hours_and_coordinates_rejected) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.6631810Z test_changed_origin_rejects_internal_and_instant_checkout (tests.test_audit_regressions.AuditRegressionTests.test_changed_origin_rejects_internal_and_instant_checkout) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.6959043Z test_duplicate_400_stays_ambiguous (tests.test_audit_regressions.AuditRegressionTests.test_duplicate_400_stays_ambiguous) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.7297138Z test_legacy_quote_requires_requote (tests.test_audit_regressions.AuditRegressionTests.test_legacy_quote_requires_requote) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.7686148Z test_mock_replaced_by_gateway_attempt (tests.test_audit_regressions.AuditRegressionTests.test_mock_replaced_by_gateway_attempt) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:00.8360484Z test_origin_change_after_payment_blocks_shipment (tests.test_audit_regressions.AuditRegressionTests.test_origin_change_after_payment_blocks_shipment) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.2503912Z test_readonly_admin_never_renders_hidden_payload (tests.test_audit_regressions.AuditRegressionTests.test_readonly_admin_never_renders_hidden_payload) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.2774003Z test_real_attempt_never_reused_or_reconciled_in_other_environment (tests.test_audit_regressions.AuditRegressionTests.test_real_attempt_never_reused_or_reconciled_in_other_environment) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.2830626Z test_valid_official_store_and_readiness (tests.test_audit_regressions.AuditRegressionTests.test_valid_official_store_and_readiness) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.3463728Z test_csrf_and_logout_post_only (tests.test_auth.AuthenticationTests.test_csrf_and_logout_post_only) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.3729075Z test_expired_otp_rejected_and_resend_invalidates_old (tests.test_auth.AuthenticationTests.test_expired_otp_rejected_and_resend_invalidates_old) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.4776761Z test_forgot_password_invalidates_previous_sessions (tests.test_auth.AuthenticationTests.test_forgot_password_invalidates_previous_sessions) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.5895093Z test_login_redirects_to_role_after_password_not_email_alone (tests.test_auth.AuthenticationTests.test_login_redirects_to_role_after_password_not_email_alone) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.6247019Z test_open_redirect_and_role_url_do_not_grant_access (tests.test_auth.AuthenticationTests.test_open_redirect_and_role_url_do_not_grant_access) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.6465207Z test_otp_is_purpose_bound_single_use_and_email_bound (tests.test_auth.AuthenticationTests.test_otp_is_purpose_bound_single_use_and_email_bound) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.6783319Z test_otp_wrong_attempts_commit_and_lock_after_five (tests.test_auth.AuthenticationTests.test_otp_wrong_attempts_commit_and_lock_after_five) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.7071569Z test_owner_can_link_personal_google_without_business_write_access (tests.test_auth.AuthenticationTests.test_owner_can_link_personal_google_without_business_write_access) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.7349484Z test_owner_cannot_mutate_and_cannot_switch_to_unassigned_role (tests.test_auth.AuthenticationTests.test_owner_cannot_mutate_and_cannot_switch_to_unassigned_role) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.7409522Z test_rate_limits_persist_after_rejection (tests.test_auth.AuthenticationTests.test_rate_limits_persist_after_rejection) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.7846633Z test_register_uses_email_otp_and_only_customer_role (tests.test_auth.AuthenticationTests.test_register_uses_email_otp_and_only_customer_role) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.7926201Z test_totp_and_recovery_cannot_be_replayed (tests.test_auth.AuthenticationTests.test_totp_and_recovery_cannot_be_replayed) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.8131616Z test_unknown_email_has_same_forgot_response (tests.test_auth.AuthenticationTests.test_unknown_email_has_same_forgot_response) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.8709481Z test_approval_requires_verified_documents (tests.test_boarding.BoardingTests.test_approval_requires_verified_documents) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:01.9230257Z test_cleaning_period_blocks_following_stay (tests.test_boarding.BoardingTests.test_cleaning_period_blocks_following_stay) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.0084808Z test_extension_changes_effective_checkout_only_after_payment_once (tests.test_boarding.BoardingTests.test_extension_changes_effective_checkout_only_after_payment_once) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.0907671Z test_extension_expiry_releases_only_extra_period (tests.test_boarding.BoardingTests.test_extension_expiry_releases_only_extra_period) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.1501121Z test_extension_reject_and_single_active_request (tests.test_boarding.BoardingTests.test_extension_reject_and_single_active_request) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.2479384Z test_late_extension_can_be_closed_after_refund (tests.test_boarding.BoardingTests.test_late_extension_can_be_closed_after_refund) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.3194423Z test_paid_late_extension_does_not_change_original_stay (tests.test_boarding.BoardingTests.test_paid_late_extension_does_not_change_original_stay) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.3360837Z test_rejection_requires_reason_and_preserves_customer_reason (tests.test_boarding.BoardingTests.test_rejection_requires_reason_and_preserves_customer_reason) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.4096234Z test_audit_is_append_only (tests.test_care_reviews.CareAndReviewTests.test_audit_is_append_only) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.4516600Z test_doctor_required_and_finish_needs_published_record (tests.test_care_reviews.CareAndReviewTests.test_doctor_required_and_finish_needs_published_record) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.5840919Z test_draft_hidden_published_pdf_excludes_internal_notes (tests.test_care_reviews.CareAndReviewTests.test_draft_hidden_published_pdf_excludes_internal_notes) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.6002925Z test_failed_business_attachment_removes_blob_and_metadata (tests.test_care_reviews.CareAndReviewTests.test_failed_business_attachment_removes_blob_and_metadata) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.6495183Z test_published_record_immutable_revision_is_new_version (tests.test_care_reviews.CareAndReviewTests.test_published_record_immutable_revision_is_new_version) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.7160505Z test_review_requires_completed_paid_owned_target_and_is_unique (tests.test_care_reviews.CareAndReviewTests.test_review_requires_completed_paid_owned_target_and_is_unique) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.7935078Z test_upload_type_validated_and_private_download_scoped (tests.test_care_reviews.CareAndReviewTests.test_upload_type_validated_and_private_download_scoped) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.8562082Z test_booking_idempotency_and_wrong_customer (tests.test_commerce.CommerceTests.test_booking_idempotency_and_wrong_customer) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.9014121Z test_booking_payment_and_capacity_collision (tests.test_commerce.CommerceTests.test_booking_payment_and_capacity_collision) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.9264611Z test_cart_or_price_change_requires_new_checkout (tests.test_commerce.CommerceTests.test_cart_or_price_change_requires_new_checkout) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:02.9683877Z test_checkout_holds_stock_payment_consumes_once_handover_completes (tests.test_commerce.CommerceTests.test_checkout_holds_stock_payment_consumes_once_handover_completes) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.0078962Z test_duplicate_distinct_funds_are_recorded_unapplied (tests.test_commerce.CommerceTests.test_duplicate_distinct_funds_are_recorded_unapplied) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.0616930Z test_expired_stock_released_and_expired_batches_not_sold (tests.test_commerce.CommerceTests.test_expired_stock_released_and_expired_batches_not_sold) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.0894820Z test_fefo_uses_earliest_batch (tests.test_commerce.CommerceTests.test_fefo_uses_earliest_batch) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.1276295Z test_last_item_and_db_balance_protection (tests.test_commerce.CommerceTests.test_last_item_and_db_balance_protection) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.1929555Z test_late_payment_keeps_money_without_stealing_slot (tests.test_commerce.CommerceTests.test_late_payment_keeps_money_without_stealing_slot) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.1964563Z test_owner_service_mutation_denied (tests.test_commerce.CommerceTests.test_owner_service_mutation_denied) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.2609892Z test_paid_booking_can_be_closed_after_full_refund (tests.test_commerce.CommerceTests.test_paid_booking_can_be_closed_after_full_refund) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.2892105Z test_pet_cannot_have_overlapping_vet_and_grooming (tests.test_commerce.CommerceTests.test_pet_cannot_have_overlapping_vet_and_grooming) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.3536824Z test_refunded_order_closes_without_automatic_stock_return (tests.test_commerce.CommerceTests.test_refunded_order_closes_without_automatic_stock_return) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.4100946Z test_refunds_bounded_by_received_funds_and_no_automatic_stock_return (tests.test_commerce.CommerceTests.test_refunds_bounded_by_received_funds_and_no_automatic_stock_return) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.4603232Z test_reschedule_reallocates_and_old_version_cannot_repeat (tests.test_commerce.CommerceTests.test_reschedule_reallocates_and_old_version_cannot_repeat) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.4812966Z test_wrong_payment_amount_rejected (tests.test_commerce.CommerceTests.test_wrong_payment_amount_rejected) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.5725953Z test_different_quote_cannot_be_used_for_another_order (tests.test_delivery.DeliveryTests.test_different_quote_cannot_be_used_for_another_order) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.6452257Z test_dispatch_timeout_stays_unknown_no_second_shipment (tests.test_delivery.DeliveryTests.test_dispatch_timeout_stays_unknown_no_second_shipment) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.6603513Z test_nearby_offers_internal_and_instant (tests.test_delivery.DeliveryTests.test_nearby_offers_internal_and_instant) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.6723853Z test_outside_radius_does_not_offer_internal (tests.test_delivery.DeliveryTests.test_outside_radius_does_not_offer_internal) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.7308167Z test_quote_changed_address_and_expired_quote_rejected (tests.test_delivery.DeliveryTests.test_quote_changed_address_and_expired_quote_rejected) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.7426959Z test_route_api_failure_fails_closed_for_internal (tests.test_delivery.DeliveryTests.test_route_api_failure_fails_closed_for_internal) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.8053440Z test_shipment_is_idempotent_and_delivered_completes_order (tests.test_delivery.DeliveryTests.test_shipment_is_idempotent_and_delivered_completes_order) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.8206518Z test_shipping_webhook_rejects_forged_payload (tests.test_delivery.DeliveryTests.test_shipping_webhook_rejects_forged_payload) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.8718782Z test_window_quota_includes_fulfilled (tests.test_delivery.DeliveryTests.test_window_quota_includes_fulfilled) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.9435894Z test_brand_logo_and_copy_apply_to_header_footer_and_auth (tests.test_dynamic.DynamicTests.test_brand_logo_and_copy_apply_to_header_footer_and_auth) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:03.9931206Z test_catalog_sort_and_pagination_preserve_filters (tests.test_dynamic.DynamicTests.test_catalog_sort_and_pagination_preserve_filters) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.0513157Z test_cms_button_requires_label_and_destination_together (tests.test_dynamic.DynamicTests.test_cms_button_requires_label_and_destination_together) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.1057504Z test_cms_does_not_accept_external_or_script_cta_route (tests.test_dynamic.DynamicTests.test_cms_does_not_accept_external_or_script_cta_route) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.1564559Z test_cms_edit_escapes_html_and_is_immediately_visible (tests.test_dynamic.DynamicTests.test_cms_edit_escapes_html_and_is_immediately_visible) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.1976427Z test_cms_image_public_only_while_referenced_and_active (tests.test_dynamic.DynamicTests.test_cms_image_public_only_while_referenced_and_active) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.2591395Z test_contact_archive_is_owned_post_only_and_not_bookable (tests.test_dynamic.DynamicTests.test_contact_archive_is_owned_post_only_and_not_bookable) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.3451636Z test_create_product_publishes_variant_photo_species_and_initial_stock (tests.test_dynamic.DynamicTests.test_create_product_publishes_variant_photo_species_and_initial_stock) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.3676971Z test_disabled_auth_art_has_no_empty_image_request (tests.test_dynamic.DynamicTests.test_disabled_auth_art_has_no_empty_image_request) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.4209947Z test_duplicate_sku_does_not_create_product_or_stock (tests.test_dynamic.DynamicTests.test_duplicate_sku_does_not_create_product_or_stock) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.5059186Z test_edit_product_updates_existing_variant_without_recreating_stock (tests.test_dynamic.DynamicTests.test_edit_product_updates_existing_variant_without_recreating_stock) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.5880522Z test_inactive_product_and_inactive_category_not_published (tests.test_dynamic.DynamicTests.test_inactive_product_and_inactive_category_not_published) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.6468927Z test_invalid_image_rejected_without_creating_product (tests.test_dynamic.DynamicTests.test_invalid_image_rejected_without_creating_product) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.7710501Z test_master_explains_incomplete_legacy_product (tests.test_dynamic.DynamicTests.test_master_explains_incomplete_legacy_product) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.8027293Z test_owner_read_only_and_customer_cannot_edit_content (tests.test_dynamic.DynamicTests.test_owner_read_only_and_customer_cannot_edit_content) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.8200471Z test_private_health_document_is_not_a_public_cms_asset (tests.test_dynamic.DynamicTests.test_private_health_document_is_not_a_public_cms_asset) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.9090541Z test_product_card_detail_and_customer_staff_shells_differ (tests.test_dynamic.DynamicTests.test_product_card_detail_and_customer_staff_shells_differ) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.9367497Z test_unrestricted_product_visible_under_every_active_species (tests.test_dynamic.DynamicTests.test_unrestricted_product_visible_under_every_active_species) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:04.9385984Z test_update_manifest_includes_dynamic_pages_and_migrations (tests.test_dynamic.DynamicTests.test_update_manifest_includes_dynamic_pages_and_migrations) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.0111428Z test_zero_stock_product_still_visible_but_cannot_add_from_card (tests.test_dynamic.DynamicTests.test_zero_stock_product_still_visible_but_cannot_add_from_card) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.1073068Z test_address_delete_is_owned_and_excluded_from_checkout (tests.test_experience.ExperienceTests.test_address_delete_is_owned_and_excluded_from_checkout) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.5240570Z test_all_master_sections_render_and_old_store_link_uses_workspace (tests.test_experience.ExperienceTests.test_all_master_sections_render_and_old_store_link_uses_workspace) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.5953239Z test_cancelled_order_hides_invoice_link_and_rejects_direct_invoice (tests.test_experience.ExperienceTests.test_cancelled_order_hides_invoice_link_and_rejects_direct_invoice) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.6173998Z test_cart_add_stays_in_catalog_and_ajax_returns_count (tests.test_experience.ExperienceTests.test_cart_add_stays_in_catalog_and_ajax_returns_count) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.6353803Z test_cart_next_cannot_redirect_to_another_site (tests.test_experience.ExperienceTests.test_cart_next_cannot_redirect_to_another_site) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.7091124Z test_customer_cannot_open_inactive_or_time_elapsed_invoice (tests.test_experience.ExperienceTests.test_customer_cannot_open_inactive_or_time_elapsed_invoice) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.7729881Z test_customer_cannot_see_master_and_owner_cannot_write (tests.test_experience.ExperienceTests.test_customer_cannot_see_master_and_owner_cannot_write) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.8127720Z test_document_replacement_resets_verification_preserves_old_file_and_ownership (tests.test_experience.ExperienceTests.test_document_replacement_resets_verification_preserves_old_file_and_ownership) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.8414655Z test_invalid_replacement_keeps_verified_document_active (tests.test_experience.ExperienceTests.test_invalid_replacement_keeps_verified_document_active) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.9044856Z test_invoice_poll_is_owned_readonly_and_does_not_contact_provider (tests.test_experience.ExperienceTests.test_invoice_poll_is_owned_readonly_and_does_not_contact_provider) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:05.9655482Z test_master_refund_is_unavailable_and_super_admin_lists_customers (tests.test_experience.ExperienceTests.test_master_refund_is_unavailable_and_super_admin_lists_customers) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.0669805Z test_otp_is_html_plus_plain_text_without_purpose_codes (tests.test_experience.ExperienceTests.test_otp_is_html_plus_plain_text_without_purpose_codes) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.1261681Z test_personal_pet_delete_is_owned_post_only_and_preserves_history (tests.test_experience.ExperienceTests.test_personal_pet_delete_is_owned_post_only_and_preserves_history) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.1306025Z test_pet_photo_rejects_pdf_instead_of_rendering_a_broken_image (tests.test_experience.ExperienceTests.test_pet_photo_rejects_pdf_instead_of_rendering_a_broken_image) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.1728956Z test_pet_with_active_booking_cannot_be_removed (tests.test_experience.ExperienceTests.test_pet_with_active_booking_cannot_be_removed) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.2116941Z test_public_shell_has_no_environment_provider_or_technical_expiry_copy (tests.test_experience.ExperienceTests.test_public_shell_has_no_environment_provider_or_technical_expiry_copy) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.2726258Z test_removed_actions_cannot_create_refund_or_check_provider (tests.test_experience.ExperienceTests.test_removed_actions_cannot_create_refund_or_check_provider) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.3042807Z test_removed_default_address_promotes_an_active_address (tests.test_experience.ExperienceTests.test_removed_default_address_promotes_an_active_address) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.3766791Z test_staff_cannot_pay_simulate_or_add_to_cart (tests.test_experience.ExperienceTests.test_staff_cannot_pay_simulate_or_add_to_cart) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.3863158Z test_stale_address_object_cannot_create_a_new_delivery (tests.test_experience.ExperienceTests.test_stale_address_object_cannot_create_a_new_delivery) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.4052574Z test_stale_pet_object_cannot_book_after_archive (tests.test_experience.ExperienceTests.test_stale_pet_object_cannot_book_after_archive) ... FAIL
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.4437304Z test_store_editor_saves_hours_and_audits_without_json_input (tests.test_experience.ExperienceTests.test_store_editor_saves_hours_and_audits_without_json_input) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.5253660Z test_verified_document_has_no_verification_form (tests.test_experience.ExperienceTests.test_verified_document_has_no_verification_form) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6126381Z test_address_page_has_local_leaflet_and_attribution_without_google_maps_scripts (tests.test_free_maps.FreeMapPagesTests.test_address_page_has_local_leaflet_and_attribution_without_google_maps_scripts) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6391115Z test_expired_estimate_requires_new_provider_verification (tests.test_free_maps.FreeRoutingTests.test_expired_estimate_requires_new_provider_verification) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6401494Z test_invalid_coordinate_and_unsupported_mode_do_not_call_provider (tests.test_free_maps.FreeRoutingTests.test_invalid_coordinate_and_unsupported_mode_do_not_call_provider) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6586607Z test_malformed_nonfinite_and_negative_distances_are_rejected (tests.test_free_maps.FreeRoutingTests.test_malformed_nonfinite_and_negative_distances_are_rejected) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6598488Z test_missing_key_does_not_call_provider (tests.test_free_maps.FreeRoutingTests.test_missing_key_does_not_call_provider) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6675317Z test_ors_coordinate_order_meters_header_and_conservative_rounding (tests.test_free_maps.FreeRoutingTests.test_ors_coordinate_order_meters_header_and_conservative_rounding) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6746056Z test_provider_quota_failure_never_creates_fake_or_cached_distance (tests.test_free_maps.FreeRoutingTests.test_provider_quota_failure_never_creates_fake_or_cached_distance) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.6825353Z test_shared_local_quota_stops_request_before_api_call (tests.test_free_maps.FreeRoutingTests.test_shared_local_quota_stops_request_before_api_call) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.7190878Z test_diagnostics_never_print_credentials_and_strict_fails_incomplete_config (tests.test_integrations.IntegrationFlowTests.test_diagnostics_never_print_credentials_and_strict_fails_incomplete_config) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.7675505Z test_legacy_return_is_supported (tests.test_integrations.IntegrationFlowTests.test_legacy_return_is_supported) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.8180399Z test_return_enforces_invoice_ownership (tests.test_integrations.IntegrationFlowTests.test_return_enforces_invoice_ownership) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.8621388Z test_return_query_cannot_settle_payment_or_choose_arbitrary_redirect (tests.test_integrations.IntegrationFlowTests.test_return_query_cannot_settle_payment_or_choose_arbitrary_redirect) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:06.8995822Z test_return_requires_login_and_retains_reference (tests.test_integrations.IntegrationFlowTests.test_return_requires_login_and_retains_reference) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.0426524Z test_delivery_map_link_uses_unlocalized_coordinates (tests.test_operations.DeliveryOperationsTests.test_delivery_map_link_uses_unlocalized_coordinates) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.1084787Z test_dispatch_cost_change_waits_for_explicit_approval (tests.test_operations.DeliveryOperationsTests.test_dispatch_cost_change_waits_for_explicit_approval) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.1781960Z test_internal_assignment_start_proof_and_completion (tests.test_operations.DeliveryOperationsTests.test_internal_assignment_start_proof_and_completion) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.2383095Z test_reassigned_courier_cannot_start_from_stale_assignment (tests.test_operations.DeliveryOperationsTests.test_reassigned_courier_cannot_start_from_stale_assignment) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.2873969Z test_forged_payment_webhook_rejected (tests.test_operations.OperationalSecurityTests.test_forged_payment_webhook_rejected) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.3077836Z test_google_matching_staff_email_does_not_auto_link_or_login (tests.test_operations.OperationalSecurityTests.test_google_matching_staff_email_does_not_auto_link_or_login) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.4140337Z test_invoice_exactly_one_target_and_owner_denial_includes_security_headers (tests.test_operations.OperationalSecurityTests.test_invoice_exactly_one_target_and_owner_denial_includes_security_headers) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.4207361Z test_last_active_super_admin_cannot_be_removed (tests.test_operations.OperationalSecurityTests.test_last_active_super_admin_cannot_be_removed) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.4362661Z test_otp_binding_survives_email_change_and_old_message_is_not_sent (tests.test_operations.OperationalSecurityTests.test_otp_binding_survives_email_change_and_old_message_is_not_sent) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.4534783Z test_smtp_uncertainty_not_blindly_retried (tests.test_operations.OperationalSecurityTests.test_smtp_uncertainty_not_blindly_retried) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.4996296Z test_staff_invite_requires_otp_then_sets_verified_password (tests.test_operations.OperationalSecurityTests.test_staff_invite_requires_otp_then_sets_verified_password) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.5822739Z test_catalog_intersects_species_and_category (tests.test_pages.PageTests.test_catalog_intersects_species_and_category) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.7518127Z test_customer_pages_render_and_have_no_back_to_website (tests.test_pages.PageTests.test_customer_pages_render_and_have_no_back_to_website) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.8004342Z test_invalid_boarding_document_does_not_leave_a_booking (tests.test_pages.PageTests.test_invalid_boarding_document_does_not_leave_a_booking) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.8931005Z test_object_level_booking_and_invoice_scoping (tests.test_pages.PageTests.test_object_level_booking_and_invoice_scoping) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:07.9682521Z test_public_pages_and_guest_booking_gate (tests.test_pages.PageTests.test_public_pages_and_guest_booking_gate) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:08.0120890Z test_security_headers_no_private_media_route (tests.test_pages.PageTests.test_security_headers_no_private_media_route) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:08.3361919Z test_staff_role_dashboards_render_and_admin_pages_are_scoped (tests.test_pages.PageTests.test_staff_role_dashboards_render_and_admin_pages_are_scoped) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:08.3491391Z test_maintenance_accepts_empty_reminders_with_nullable_sources (tests.test_reminders.ReminderQueryTests.test_maintenance_accepts_empty_reminders_with_nullable_sources) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:09.9669204Z test_upgrade_labels_known_gateway_urls_and_preserves_old_quote_for_review (tests.test_audit_migrations.AuditMigrationTests.test_upgrade_labels_known_gateway_urls_and_preserves_old_quote_for_review) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:10.1010772Z test_public_hosts_and_webhook_disable_debug (tests.test_audit_regressions.DebugPolicyTests.test_public_hosts_and_webhook_disable_debug) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:10.6371363Z test_settings_ignore_debug_true_for_public_tunnel (tests.test_audit_regressions.DebugPolicyTests.test_settings_ignore_debug_true_for_public_tunnel) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:10.8015445Z test_duplicate_payment_callbacks_apply_once_across_connections (tests.test_concurrency.ConcurrencyTests.test_duplicate_payment_callbacks_apply_once_across_connections) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.0989314Z test_two_bookings_compete_for_one_doctor (tests.test_concurrency.ConcurrencyTests.test_two_bookings_compete_for_one_doctor) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.3578553Z test_two_checkouts_compete_for_last_item (tests.test_concurrency.ConcurrencyTests.test_two_checkouts_compete_for_last_item) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.6429026Z test_two_delivery_checkouts_compete_for_one_window (tests.test_concurrency.ConcurrencyTests.test_two_delivery_checkouts_compete_for_one_window) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7736063Z test_insecure_tiles_are_rejected (tests.test_free_maps.FreeMapConfigTests.test_insecure_tiles_are_rejected) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7742205Z test_readiness_does_not_require_any_google_maps_key (tests.test_free_maps.FreeMapConfigTests.test_readiness_does_not_require_any_google_maps_key) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7744237Z test_app_origin_rejects_credentials_paths_and_query (tests.test_integrations.IntegrationConfigTests.test_app_origin_rejects_credentials_paths_and_query) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7763000Z test_local_snap_finish_and_webhook_are_separate (tests.test_integrations.IntegrationConfigTests.test_local_snap_finish_and_webhook_are_separate) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7765793Z test_missing_enabled_credentials_reported (tests.test_integrations.IntegrationConfigTests.test_missing_enabled_credentials_reported) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7770537Z test_mutually_exclusive_smtp_encryption (tests.test_integrations.IntegrationConfigTests.test_mutually_exclusive_smtp_encryption) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7786409Z test_production_snap_uses_live_endpoint_and_own_finish (tests.test_integrations.IntegrationConfigTests.test_production_snap_uses_live_endpoint_and_own_finish) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7788702Z test_public_callback_rejects_local_http (tests.test_integrations.IntegrationConfigTests.test_public_callback_rejects_local_http) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7791853Z test_unknown_modes_fail_instead_of_choosing_real_provider (tests.test_integrations.IntegrationConfigTests.test_unknown_modes_fail_instead_of_choosing_real_provider) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7799463Z test_biteship_duplicate_reference_is_reconciled (tests.test_providers.ProviderContractTests.test_biteship_duplicate_reference_is_reconciled) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7801705Z test_disabled_routing_never_uses_an_external_provider (tests.test_providers.ProviderContractTests.test_disabled_routing_never_uses_an_external_provider) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7803852Z test_midtrans_signature_uses_original_amount_string (tests.test_providers.ProviderContractTests.test_midtrans_signature_uses_original_amount_string) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7806677Z test_mock_routes_forbidden_outside_local (tests.test_providers.ProviderContractTests.test_mock_routes_forbidden_outside_local) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7808498Z test_money_is_integer_rupiah_and_fraud_not_accepted (tests.test_providers.ProviderContractTests.test_money_is_integer_rupiah_and_fraud_not_accepted) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.7821997Z test_snap_redirect_must_belong_to_configured_gateway (tests.test_providers.ProviderContractTests.test_snap_redirect_must_belong_to_configured_gateway) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:11.9440335Z test_dry_run_does_not_change_files_or_create_backup (tests.test_update_installer.UpdateInstallerTests.test_dry_run_does_not_change_files_or_create_backup) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.1417404Z test_google_mode_migrates_without_replacing_existing_credentials (tests.test_update_installer.UpdateInstallerTests.test_google_mode_migrates_without_replacing_existing_credentials) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.3297602Z test_update_preserves_chosen_route_mode_and_includes_audit_migrations (tests.test_update_installer.UpdateInstallerTests.test_update_preserves_chosen_route_mode_and_includes_audit_migrations) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5074673Z test_update_preserves_existing_secrets_and_runtime_files_and_backs_up_code (tests.test_update_installer.UpdateInstallerTests.test_update_preserves_existing_secrets_and_runtime_files_and_backs_up_code) ... ok
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5075704Z 
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5075899Z ======================================================================
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5077155Z FAIL: test_stale_pet_object_cannot_book_after_archive (tests.test_experience.ExperienceTests.test_stale_pet_object_cannot_book_after_archive)
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5078490Z ----------------------------------------------------------------------
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5079126Z Traceback (most recent call last):
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5079900Z   File "/app/tests/test_experience.py", line 315, in test_stale_pet_object_cannot_book_after_archive
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5080801Z     with self.assertRaises(BusinessError):
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5081292Z          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5081792Z AssertionError: BusinessError not raised
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5082228Z 
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5082400Z ----------------------------------------------------------------------
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5083075Z Ran 165 tests in 12.047s
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5083253Z 
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5083403Z FAILED (failures=1)
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.5083904Z Destroying test database for alias 'default' ('test_sinau')...
+postgres-tests	Verify schema and application	2026-11-18T03:54:12.9794784Z ##[error]Process completed with exit code 1.
