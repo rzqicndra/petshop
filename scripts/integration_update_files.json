@@ -36,6 +36,7 @@
   "core/middleware.py",
   "core/migrations/0003_storesettings_cs_label_storesettings_footer_text_and_more.py",
   "core/migrations/0004_initial_site_content.py",
+  "core/migrations/0005_reschedule_notice.py",
   "core/models.py",
   "core/notifications.py",
   "core/opening.py",
@@ -78,6 +79,7 @@
   "scheduling/views.py",
   "scripts/install_update.py",
   "scripts/integration_update_files.json",
+  "static/css/booking.css",
   "static/css/customer.css",
   "static/css/dynamic.css",
   "static/css/experience.css",
@@ -103,6 +105,7 @@
   "templates/base.html",
   "templates/billing/cancellation_help.html",
   "templates/billing/invoice.html",
+  "templates/billing/payment_link.html",
   "templates/core/audit.html",
   "templates/core/capacity.html",
   "templates/core/cashier.html",
@@ -141,6 +144,7 @@
   "templates/scheduling/detail.html",
   "templates/scheduling/list.html",
   "templates/scheduling/new.html",
+  "templates/scheduling/reschedule.html",
   "templates/scheduling/slots.html",
   "templates/scheduling/timetable.html",
   "tests/test_audit_migrations.py",
@@ -157,5 +161,6 @@
   "tests/test_pages.py",
   "tests/test_providers.py",
   "tests/test_reminders.py",
+  "tests/test_reschedule_policy.py",
   "tests/test_update_installer.py"
 ]

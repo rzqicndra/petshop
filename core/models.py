@@ -1,6 +1,7 @@
 """Domain models. Mutations are orchestrated by the module services."""
 
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q, F
 from django.db.models.functions import Lower
@@ -21,6 +22,12 @@ class StoreSettings(TimestampedModel):
     cs_whatsapp = models.CharField(max_length=32, default="", blank=True, null=True)
     timezone = models.CharField(max_length=60, default="", blank=True)
     opening_hours = models.JSONField(default=dict, blank=True)
+    reschedule_notice_minutes = models.PositiveSmallIntegerField(
+        default=120,
+        validators=[MinValueValidator(15), MaxValueValidator(1440)],
+        verbose_name="Batas ubah jadwal (menit sebelum layanan)",
+        help_text="Berlaku untuk jadwal lama dan jadwal pengganti. 120 menit = 2 jam. Isi 15–1440 menit.",
+    )
     public_contact_ready = models.BooleanField(default=False)
     tagline = models.CharField(
         max_length=160, default="Care, with a little more heart.", blank=True
@@ -43,6 +50,10 @@ class StoreSettings(TimestampedModel):
     class Meta:
         constraints = [
             models.CheckConstraint(condition=Q(id=1), name="store_singleton"),
+            models.CheckConstraint(
+                condition=Q(reschedule_notice_minutes__gte=15, reschedule_notice_minutes__lte=1440),
+                name="store_reschedule_notice_range",
+            ),
         ]
 
 

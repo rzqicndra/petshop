@@ -31,7 +31,7 @@
 <div><dt>Pembayaran</dt><dd>{% if invoice|invoice_available %}{{ invoice.status|status_label }}{% else %}Belum diterbitkan{% endif %}</dd>
 </div></dl>
 <div class="price-total"><span>Total</span><strong>{{ order.total_rp|rupiah }}</strong>
-</div>{% if invoice|invoice_available %}<a class="button full" href="{% url 'invoice' invoice.pk %}">Buka tagihan {% icon 'arrow' %}</a>{% endif %}</section>{% if can_operate %}<section class="panel">
+</div>{% if invoice|invoice_available %}{% include 'billing/payment_link.html' %}{% endif %}</section>{% if can_operate %}<section class="panel">
 <h2>Proses pesanan</h2>{% if order.status == 'PAID' %}<form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="pack">Barang selesai dikemas {% icon 'arrow' %}</button>
 </form>{% elif order.status == 'PACKED' and order.fulfillment == 'PICKUP' %}<p class="small muted">Periksa nomor pesanan dan catat nama penerima saat barang diserahkan.</p>
 <form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="handover">

@@ -2,7 +2,7 @@
 {% block title %}Jadwal toko & petugas · {{ store_settings.business_name|default:"Sinau Satwa" }}{% endblock %}
 {% block content %}
 <div class="schedule-page">
-<header class="page-heading"><div><h1>Jadwal toko & petugas</h1><p>Jam buka dan petugas yang dijadwalkan untuk hari ini hingga tujuh hari ke depan. Waktu toko · {{ zone_name }}.</p></div><a href="{% url 'new_booking' %}" class="button">Booking layanan {% icon 'arrow' %}</a></header>
+<header class="page-heading"><div><h1>Jadwal toko & petugas</h1><p>Jam buka dan petugas yang dijadwalkan untuk hari ini hingga tujuh hari ke depan.</p></div><a href="{% url 'new_booking' %}" class="button">Booking layanan {% icon 'arrow' %}</a></header>
 {% if hours_published %}
 <div class="schedule-list">{% for row in days %}
   <section class="schedule-row">

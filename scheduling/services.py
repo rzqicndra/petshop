@@ -21,6 +21,7 @@ from .availability import (
     MAX_MINUTES,
     STEP,
     opening_interval,
+    reschedule_window,
     store_calendar,
 )
 
@@ -328,6 +329,16 @@ def reschedule_booking(actor, booking, starts_at, expected_version):
             validate_time(
                 starts_at, ends_at, booking.kind_snapshot, online=active_role(actor) == "CUSTOMER"
             )
+            window = reschedule_window(booking)
+            if not window["allowed"]:
+                raise BusinessError(
+                    f"Batas ubah jadwal adalah {window['notice']} sebelum layanan. "
+                    "Hubungi toko untuk bantuan."
+                )
+            if starts_at < window["minimum_start"]:
+                raise BusinessError(
+                    f"Pilih jadwal pengganti minimal {window['notice']} dari sekarang."
+                )
             expire_capacity_holds()
             ResourceReservation.objects.filter(booking=booking, status__in=BLOCKING).update(
                 status="RELEASED"

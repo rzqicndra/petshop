@@ -1,0 +1,20 @@
+{% load sinau %}
+{% if reschedule %}
+<section class="panel booking-reschedule" id="ubah-jadwal" aria-labelledby="reschedule-title">
+  {% if reschedule.allowed %}
+  <details {% if reschedule_open %}open{% endif %}>
+    <summary><span><strong id="reschedule-title">Ubah jadwal kunjungan</strong><small>Tersedia sampai {{ reschedule.cutoff|date:'d M Y, H:i' }}</small></span><span class="reschedule-toggle"><span class="reschedule-show">Pilih jadwal</span><span class="reschedule-hide">Tutup pilihan</span></span></summary>
+    <p class="reschedule-policy">Perubahan paling lambat {{ reschedule.notice }} sebelum layanan. Jadwal pengganti juga harus berjarak minimal {{ reschedule.notice }} dari sekarang.</p>
+    <div class="current-appointment">{% icon 'calendar' %}<div><small>Jadwal Anda saat ini</small><strong>{{ booking.starts_at|date:'l, d M Y' }} · {{ booking.starts_at|date:'H:i' }}–{{ booking.ends_at|date:'H:i' }}</strong></div></div>
+    <form method="post" class="stack-form" data-confirm="Simpan jadwal pengganti yang dipilih? Jadwal lama dilepas hanya jika jadwal baru berhasil tersedia.">
+      {% csrf_token %}<input type="hidden" name="action" value="reschedule"><input type="hidden" name="hari" value="{{ selected_day|default:'' }}">{{ reschedule_form.version }}
+      {% include 'scheduling/slots.html' %}
+      {% if slots %}<div class="reschedule-actions"><button class="button centered-action" type="submit">Simpan jadwal baru</button><small>Jadwal saat ini tetap berlaku sampai perubahan berhasil.</small></div>{% endif %}
+    </form>
+  </details>
+  {% else %}
+    <h2 id="reschedule-title">Perubahan jadwal ditutup</h2>
+    <p class="muted">Batas perubahan adalah {{ reschedule.notice }} sebelum layanan ({{ reschedule.cutoff|date:'d M Y, H:i' }}). Hubungi toko jika Anda memerlukan bantuan.</p>
+  {% endif %}
+</section>
+{% endif %}

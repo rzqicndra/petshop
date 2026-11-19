@@ -4,14 +4,14 @@
 <div class="page-heading">
 <div>
 <p class="eyebrow">{% if staff_workspace %}RINCIAN TRANSAKSI{% else %}PEMBAYARAN{% endif %}</p>
-<h1>Detail tagihan</h1>
+<h1>Detail pembayaran</h1>
 <p>{{ invoice.code }} · {{ invoice.customer.name }}</p>
 </div><span class="badge {{ invoice.status|status_tone }}">{{ invoice.status|status_label }}</span>
 </div>
 <div class="detail-grid">
 <section class="panel">
 <div class="panel-title">
-<h2>Ringkasan tagihan</h2>{% icon 'file' %}</div><dl class="detail-list">
+<h2>Ringkasan pembayaran</h2>{% icon 'file' %}</div><dl class="detail-list">
 <div><dt>Nomor tagihan</dt><dd>{{ invoice.code }}</dd>
 </div>
 <div><dt>Diterbitkan</dt><dd>{{ invoice.created_at|date:'d M Y, H:i' }}</dd>

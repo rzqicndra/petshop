@@ -1,6 +1,7 @@
 {% extends 'base.html' %}{% load sinau %}
 {% block title %}Booking layanan · {{ store_settings.business_name|default:"Sinau Satwa" }}{% endblock %}
 {% block content %}
+<div class="booking-page">
 <header class="page-heading"><div><h1>Booking layanan</h1><p>Pilih hewan dan layanan untuk melihat waktu yang tersedia.</p></div><a class="text-link" href="{% url 'timetable' %}">{% icon 'calendar' %} Jadwal toko & petugas</a></header>
 {% if pets %}
 <div class="booking-layout">
@@ -25,7 +26,7 @@
       <input type="hidden" name="pet" value="{{ pet.pk }}"><input type="hidden" name="package" value="{{ package.pk }}"><input type="hidden" name="hari" value="{{ selected_day|default:'' }}">{{ form.key }}
       {% if package.service.kind == 'BOARDING' %}
         <div class="stay-dates"><div class="field"><label for="{{ form.starts_at.id_for_label }}">Check-in</label>{{ form.starts_at }}</div><div class="field"><label for="{{ form.checkout_at.id_for_label }}">Waktu jemput</label>{{ form.checkout_at }}</div></div>
-        <small class="muted">Waktu toko · {{ store_zone }}. Minimal menginap 12 jam. Tanggal check-in bisa dipilih lebih dari tujuh hari ke depan.</small>
+        <small class="muted">Minimal menginap 12 jam. Tanggal check-in bisa dipilih lebih dari tujuh hari ke depan.</small>
         <div class="field">{{ form.emergency_contact.label_tag }}{{ form.emergency_contact }}<a class="text-link small" href="{% url 'profile' %}">Kelola kontak darurat</a></div>
         <div class="field"><label for="{{ form.document.id_for_label }}">Dokumen kesehatan</label><div class="upload-zone">{% icon 'upload' %}<span class="upload-title">Pilih foto atau PDF</span>{{ form.document }}<span class="upload-filename" data-upload-name>Maksimal 5 MB</span></div></div>
       {% else %}
@@ -40,4 +41,5 @@
   {% else %}<h2>Pilih layanan untuk melanjutkan</h2><p>Untuk konsultasi dan grooming, Anda bisa melihat jam mulai dan selesai. Untuk penitipan, tentukan sendiri tanggal masuk dan jemput.</p>{% endif %}
 </section></div>
 {% else %}<section class="panel"><h2>Tambahkan hewan pertama Anda</h2><p>Profil hewan menentukan paket layanan yang dapat dipesan.</p><a class="button" href="{% url 'pets' %}">Tambah hewan {% icon 'plus' %}</a></section>{% endif %}
+</div>
 {% endblock %}

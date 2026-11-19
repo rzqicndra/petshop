@@ -163,6 +163,7 @@ class ExperienceTests(TestCase):
             "/pengaturan/toko/",
             {
                 "business_name": "Sinau Satwa Baru",
+                "reschedule_notice_minutes": "120",
                 "cs_whatsapp": "628123456789",
                 "address": "Alamat toko baru",
                 "latitude": "-6.2",

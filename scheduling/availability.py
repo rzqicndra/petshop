@@ -127,12 +127,39 @@ class AppointmentCapacity:
         return selected
 
 
+def reschedule_window(booking, *, now=None, store=None):
+    """Use one policy for the displayed choices and the locked booking mutation."""
+    now = now or timezone.now()
+    if store is None:
+        store, _ = store_calendar()
+    minutes = store.reschedule_notice_minutes if store else 120
+    notice = timedelta(minutes=minutes)
+    hours, remainder = divmod(minutes, 60)
+    label = " ".join(
+        part
+        for part in (f"{hours} jam" if hours else "", f"{remainder} menit" if remainder else "")
+        if part
+    )
+    cutoff = booking.starts_at - notice
+    return {
+        "allowed": booking.kind_snapshot in MAX_MINUTES
+        and booking.status == "CONFIRMED"
+        and now <= cutoff,
+        "cutoff": cutoff,
+        "minimum_start": now + notice,
+        "notice": label,
+    }
+
+
 def slot_picker(package, pet, requested_day="", *, exclude=None):
     store, zone = store_calendar()
     now = timezone.now()
     today = now.astimezone(zone).date()
     days = []
     result = {"slot_days": days, "selected_day": None, "slots": [], "zone_name": zone.key}
+    window = reschedule_window(exclude, now=now, store=store) if exclude else None
+    if window and not window["allowed"]:
+        return result
     if not package or not pet or package.service.kind not in MAX_MINUTES:
         return result
     if not (
@@ -157,6 +184,7 @@ def slot_picker(package, pet, requested_day="", *, exclude=None):
             end = start + duration
             if (
                 start > now
+                and (not window or start >= window["minimum_start"])
                 and (not exclude or start != exclude.starts_at)
                 and capacity.select(start, end)
             ):

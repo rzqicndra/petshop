@@ -384,7 +384,7 @@ shopHours?.addEventListener("keydown", (event) => {
   }
 });
 // Reveal manual coordinate fields when native validation needs the user's attention.
-document.querySelectorAll(".personal-page form").forEach((form) => {
+document.querySelectorAll(".personal-page form, .booking-page form").forEach((form) => {
   form.addEventListener("invalid", (event) => {
     const section = event.target.closest("details");
     if (section) section.open = true;

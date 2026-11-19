@@ -1,0 +1,1 @@
+{% if not staff_workspace or can_operate or workspace_role == 'OWNER' %}<a class="button full centered-action {% if staff_workspace or invoice.status == 'PAID' %}secondary{% endif %}" href="{% url 'invoice' invoice.pk %}">{% if staff_workspace %}Lihat transaksi{% elif invoice.status == 'PAID' %}Lihat pembayaran{% else %}Lanjutkan pembayaran{% endif %}</a>{% endif %}

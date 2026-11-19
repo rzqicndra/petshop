@@ -1,7 +1,7 @@
 import uuid
 from django.contrib import messages
 from django.utils import timezone
-from .availability import public_timetable, slot_picker, store_calendar
+from .availability import public_timetable, reschedule_window, slot_picker, store_calendar
 from .models import PackageSpecies
 from django.shortcuts import render, redirect, get_object_or_404
 from accounts.permissions import roles_required, verified_login, active_role, OPS
@@ -128,6 +128,7 @@ def new_booking(request):
             "packages": packages,
             "package": package,
             "store_zone": zone.key,
+            "selected_start": values.get("starts_at", ""),
             **slot_picker(package, pet, values.get("hari", "")),
         },
     )
@@ -316,7 +317,10 @@ def booking_detail(request, pk):
                     CareLogFile.objects.create(care_log=log, file=file)
             else:
                 raise BusinessError("Tindakan tidak tersedia.")
-            messages.success(request, "Data layanan diperbarui.")
+            messages.success(
+                request,
+                "Jadwal berhasil diubah." if action == "reschedule" else "Data layanan diperbarui.",
+            )
             return redirect("booking_detail", pk=pk)
         except BusinessError as exc:
             messages.error(request, exc.messages[0])
@@ -350,9 +354,17 @@ def booking_detail(request, pk):
     from engagement.models import Review
 
     role = active_role(request.user)
+    reschedule = (
+        reschedule_window(booking)
+        if role == "CUSTOMER" and booking.status == "CONFIRMED" and not stay
+        else None
+    )
+    requested_day = (
+        request.POST.get("hari", "") if request.method == "POST" else request.GET.get("hari", "")
+    )
     changes = (
-        slot_picker(booking.package, booking.pet, request.GET.get("hari", ""), exclude=booking)
-        if (role == "CUSTOMER" and booking.status == "CONFIRMED" and not stay)
+        slot_picker(booking.package, booking.pet, requested_day, exclude=booking)
+        if reschedule and reschedule["allowed"]
         else {}
     )
     from billing.services import cancellation_options
@@ -369,6 +381,11 @@ def booking_detail(request, pk):
             **changes,
             **cancellation,
             "booking": booking,
+            "reschedule": reschedule,
+            "reschedule_open": bool(
+                request.GET.get("hari") or request.POST.get("action") == "reschedule"
+            ),
+            "selected_start": request.POST.get("starts_at", ""),
             "visit": visit,
             "job": job,
             "stay": stay,

@@ -1,0 +1,303 @@
+/* Booking choices stay in the page flow at every screen width. */
+.booking-page {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  min-width: 0;
+}
+.booking-page .page-heading {
+  gap: 1rem;
+  align-items: start;
+}
+.booking-page .page-heading h1 {
+  font-size: clamp(1.6rem, 2.8vw, 2.1rem);
+}
+.booking-page .panel {
+  min-width: 0;
+  padding: clamp(1.1rem, 2.6vw, 1.7rem);
+}
+.booking-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 1.25rem;
+}
+.booking-page .detail-list > div {
+  grid-template-columns: minmax(110px, 0.65fr) minmax(0, 1.5fr);
+  gap: 0.8rem;
+}
+.booking-page .detail-list dd {
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+}
+.booking-page .detail-list dt {
+  font-size: 0.875rem;
+}
+.booking-page .price-total {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.booking-page .price-total strong {
+  font-size: 1.65rem;
+}
+.booking-page .booking-sections {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.booking-page .booking-sections > div:empty {
+  display: none;
+}
+.booking-reschedule {
+  margin-bottom: 1.5rem;
+  scroll-margin-top: 7rem;
+}
+.booking-reschedule > details {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.booking-reschedule > details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+.booking-reschedule > details > summary::-webkit-details-marker {
+  display: none;
+}
+.booking-reschedule > details > summary::after,
+.booking-reschedule > details[open] > summary::after {
+  content: none;
+}
+.booking-reschedule summary strong {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 650;
+}
+.booking-reschedule summary small {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+.reschedule-toggle {
+  flex-shrink: 0;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  font-size: 0.875rem;
+  color: var(--forest);
+}
+.booking-reschedule > details[open] .reschedule-toggle {
+  background: var(--sage, #eef3e9);
+}
+.booking-reschedule .reschedule-policy {
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.current-appointment {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  margin-bottom: 1rem;
+  background: #f6f8f3;
+}
+.current-appointment .icon {
+  flex-shrink: 0;
+}
+.current-appointment small,
+.current-appointment strong {
+  display: block;
+}
+.current-appointment small {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+.current-appointment strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.booking-page .booking-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.booking-page [data-booking-filters] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  align-items: end;
+  gap: 1rem;
+}
+.booking-page [data-booking-filters] .field {
+  margin: 0;
+}
+.booking-page [data-booking-filters] button {
+  margin: 0;
+}
+.appointment-picker {
+  min-width: 0;
+}
+.slot-date-heading h3 {
+  font-size: 1rem;
+  margin: 0.3rem 0 0.75rem;
+}
+.booking-page .slot-days {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.booking-page .slot-days a {
+  min-width: 0;
+  width: 100%;
+  gap: 0.15rem;
+  padding: 0.65rem 0.4rem;
+  border-radius: 0.65rem;
+}
+.booking-page .slot-days a span {
+  font-size: 0.875rem;
+}
+.booking-page .slot-days a strong {
+  font-size: 1rem;
+}
+.booking-page .slot-fieldset {
+  scroll-margin-top: 7rem;
+}
+.booking-page .slot-fieldset legend {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+.booking-page .slot-fieldset legend small {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 0.2rem;
+}
+.booking-page .slot-period {
+  margin: 0;
+  padding-block: 0.35rem;
+}
+.booking-page .slot-period summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-size: 0.95rem;
+}
+.booking-page .slot-period summary small {
+  margin: 0;
+  font-size: 0.875rem;
+}
+.booking-page .time-slots {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+.booking-page .time-slots label {
+  min-width: 0;
+  margin: 0;
+}
+.booking-page .time-slots label span {
+  width: 100%;
+  font-size: 0.95rem;
+  min-height: 46px;
+  padding-inline: 0.35rem;
+  white-space: nowrap;
+}
+.booking-page .time-slots input:checked + span::before {
+  content: "✓";
+  margin-right: 0.35rem;
+}
+.reschedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+.reschedule-actions small {
+  flex: 1 1 200px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.booking-page .button.centered-action {
+  justify-content: center;
+  text-align: center;
+}
+.booking-page .notice {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1150px) {
+  .booking-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .booking-page [data-booking-filters] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .booking-page [data-booking-filters] button {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 700px) {
+  .booking-page .page-heading {
+    flex-direction: column;
+  }
+  .booking-page .slot-days {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .booking-page .time-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .booking-page .detail-list > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+    padding-block: 0.7rem;
+  }
+  .booking-reschedule > details > summary {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .reschedule-toggle {
+    text-align: center;
+    width: 100%;
+  }
+  .reschedule-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .reschedule-actions small {
+    flex: initial;
+  }
+  .booking-page [data-booking-filters] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .booking-page .slot-days a,
+  .booking-page .time-slots label span {
+    transition:
+      background-color 0.15s,
+      border-color 0.15s;
+  }
+}
+
+.booking-reschedule .reschedule-hide,
+.booking-reschedule > details[open] .reschedule-show {
+  display: none;
+}
+.booking-reschedule > details[open] .reschedule-hide {
+  display: inline;
+}

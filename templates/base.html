@@ -1,7 +1,7 @@
 {% load static sinau %}<!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#214d40"><meta name="description" content="{{ store_settings.footer_text }}"><title>{% block title %}Sinau Satwa
 {% endblock %}
-</title><link rel="icon" href="{% if store_settings.logo_file_id %}{% url 'site_image' store_settings.logo_file_id %}{% else %}{% static 'icons/brand.svg' %}{% endif %}" ><link rel="stylesheet" href="{% static 'css/app.css' %}"><link rel="stylesheet" href="{% static 'css/experience.css' %}"><link rel="stylesheet" href="{% static 'css/dynamic.css' %}"><link rel="stylesheet" href="{% static 'css/customer.css' %}"><script src="{% static 'js/app.js' %}" defer></script><script src="{% static 'js/select.js' %}" defer></script>{% block head %}
+</title><link rel="icon" href="{% if store_settings.logo_file_id %}{% url 'site_image' store_settings.logo_file_id %}{% else %}{% static 'icons/brand.svg' %}{% endif %}" ><link rel="stylesheet" href="{% static 'css/app.css' %}"><link rel="stylesheet" href="{% static 'css/experience.css' %}"><link rel="stylesheet" href="{% static 'css/dynamic.css' %}"><link rel="stylesheet" href="{% static 'css/customer.css' %}"><link rel="stylesheet" href="{% static 'css/booking.css' %}"><script src="{% static 'js/app.js' %}" defer></script><script src="{% static 'js/select.js' %}" defer></script>{% block head %}
 {% endblock %}
 </head>
 <body class="{% if request.user.is_authenticated and shell != 'public' %}workspace {% if staff_workspace %}staff-shell{% else %}customer-shell{% endif %}{% else %}public{% endif %}"><a class="skip-link" href="#main">Lewati ke konten</a>
