@@ -45,6 +45,7 @@ class AccessMiddleware:
                 role == "OWNER"
                 and request.method not in {"GET", "HEAD", "OPTIONS"}
                 and not request.path.startswith(exempt)
+                and request.path != "/akun/profil/"
             ):
                 return HttpResponseForbidden("Workspace Owner hanya dapat melihat data.")
         return self.get_response(request)

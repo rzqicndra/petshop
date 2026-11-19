@@ -1,10 +1,35 @@
-{% extends 'base.html' %}{% load static sinau %}{% block title %}Belanja kebutuhan · {{ store_settings.business_name }}{% endblock %}
+{% extends 'base.html' %}{% load static sinau %}
+{% block title %}Belanja kebutuhan · {{ store_settings.business_name }}{% endblock %}
 {% block content %}
-<section class="marketplace">
-{% if not site_content.shop %}<div class="market-results-title"><h1>Belanja kebutuhan</h1><a class="button secondary small" href="{% url 'cart' %}">{% icon 'bag' %} Keranjang <b data-cart-count>{{ cart_count }}</b></a></div>{% endif %}
-{% if site_content.shop %}<header class="market-hero"><div><p class="eyebrow">{{ site_content.shop.overline }}</p><h1>{{ site_content.shop.heading|linebreaksbr }}</h1><p>{{ site_content.shop.body|linebreaksbr }}</p><div class="market-promises"><span>{% icon 'store' %} Ambil di toko</span><span>{% icon 'truck' %} Pengiriman ke rumah</span></div></div>{% content_image site_content.shop as shop_image %}{% if shop_image %}<img class="market-hero-photo" src="{{ shop_image }}" alt="{{ site_content.shop.image_alt }}">{% endif %}<a class="market-cart" href="{% url 'cart' %}" aria-label="Buka keranjang">{% icon 'bag' %}<span>Keranjang <b data-cart-count>{{ cart_count }}</b></span>{% icon 'arrow' %}</a></header>{% endif %}
-<nav class="pet-shortcuts" aria-label="Belanja berdasarkan hewan"><a href="{% querystring species=None category=None page=None %}" {% if not selected_species %}aria-current="true"{% endif %}><span class="shortcut-art">{% icon 'grid' %}</span>Semua kebutuhan</a>{% for animal in species_list %}<a href="{% querystring species=animal.code category=None page=None %}" {% if selected_species.pk == animal.pk %}aria-current="true"{% endif %}><span class="shortcut-art">{% if animal.image_file_id %}<img src="{% url 'site_image' animal.image_file_id %}" alt="">{% else %}{% icon 'paw' %}{% endif %}</span>Untuk {{ animal.name|lower }}</a>{% endfor %}</nav>
-<form method="get" class="market-toolbar"><div class="search-field">{% icon 'search' %}<label class="sr-only" for="search">Cari produk</label><input id="search" name="q" value="{{ request.GET.q }}" placeholder="Cari makanan, perawatan, atau nama produk" maxlength="100"><button class="button small" type="submit">Cari</button></div><div class="market-sort"><label for="sort">Urutkan</label><select id="sort" name="sort" data-auto-filter><option value="new" {% if selected_sort == 'new' %}selected{% endif %}>Terbaru</option><option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Harga terendah</option><option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Harga tertinggi</option><option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Nama A–Z</option></select></div><input type="hidden" name="species" value="{{ selected_species.code }}"><input type="hidden" name="category" value="{{ selected_category.code }}"></form>
-<div class="market-layout"><aside class="market-facets"><div class="facet-title">{% icon 'settings' %}<h2>Temukan pilihan</h2></div><h3>Kategori</h3><nav aria-label="Kategori produk"><a href="{% querystring category=None page=None %}" {% if not selected_category %}aria-current="true"{% endif %}>{% icon 'grid' %} Semua kategori</a>{% for item in categories %}<a href="{% querystring category=item.code page=None %}" {% if selected_category.pk == item.pk %}aria-current="true"{% endif %}>{% if item.image_file_id %}<img src="{% url 'site_image' item.image_file_id %}" alt="">{% else %}{% icon 'bag' %}{% endif %}{{ item.name }}</a>{% endfor %}</nav><div class="facet-help">{% icon 'heart' %}<p>Belum tahu yang cocok?</p><a href="{% url 'contact' %}">Tanyakan kepada kami {% icon 'arrow' %}</a></div></aside>
-<div class="market-results"><div class="market-results-title"><div><p class="eyebrow">PILIHAN MEREKA</p><h2>{% if selected_category %}{{ selected_category.name }}{% elif selected_species %}Kebutuhan {{ selected_species.name|lower }}{% else %}Jelajahi kebutuhan{% endif %}</h2></div><span>{{ page.paginator.count }} pilihan</span></div>{% if reset_category %}<p class="notice info">Kategori disesuaikan dengan jenis hewan pilihan Anda.</p>{% endif %}{% if request.GET.q %}<div class="active-search">Hasil untuk “{{ request.GET.q }}”<a href="{% querystring q=None page=None %}" aria-label="Hapus pencarian">{% icon 'close' %}</a></div>{% endif %}<div class="product-grid market-products">{% for product in page %}{% include 'public/product_card.html' %}{% empty %}<div class="empty-state">{% icon 'search' %}<h3>Belum ada pilihan yang sesuai.</h3><p>Coba kata kunci lain atau jelajahi kategori lainnya.</p><a class="button secondary" href="{% url 'catalog' %}">Lihat semua produk</a></div>{% endfor %}</div>{% include 'pagination.html' %}</div></div>
-</section>{% endblock %}
+<section class="shop-page">
+  <header class="compact-heading">
+    <div><h1>Belanja kebutuhan</h1><p>Temukan kebutuhan hewan Anda. Pilih ambil di toko atau kirim ke alamat.</p></div>
+    {% if not staff_workspace %}<a class="button secondary shop-cart" href="{% url 'cart' %}">{% icon 'bag' %} Keranjang <span data-cart-count>{{ cart_count }}</span></a>{% endif %}
+  </header>
+  <form method="get" class="shop-searchbar">
+    <div class="shop-search">
+      {% icon 'search' %}<label class="sr-only" for="search">Cari produk</label>
+      <input type="search" id="search" name="q" value="{{ request.GET.q }}" placeholder="Cari makanan, perawatan, atau nama produk" maxlength="100">
+      <button class="button" type="submit">Cari</button>
+    </div>
+    <div class="shop-filter"><label for="shop-species">Jenis hewan</label><select id="shop-species" name="species" data-auto-filter><option value="">Semua hewan</option>{% for animal in species_list %}<option value="{{ animal.code }}" {% if selected_species.pk == animal.pk %}selected{% endif %}>{{ animal.name }}</option>{% endfor %}</select></div>
+    <div class="shop-filter"><label for="sort">Urutkan</label><select id="sort" name="sort" data-auto-filter><option value="new" {% if selected_sort == 'new' %}selected{% endif %}>Terbaru</option><option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Harga terendah</option><option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Harga tertinggi</option><option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Nama A–Z</option></select></div>
+    <input type="hidden" name="category" value="{{ selected_category.code }}">
+  </form>
+  <nav class="shop-categories" aria-label="Kategori produk">
+    <a href="{% querystring category=None page=None %}" {% if not selected_category %}aria-current="true"{% endif %}>Semua produk</a>
+    {% for category in categories %}<a href="{% querystring category=category.code page=None %}" {% if selected_category.pk == category.pk %}aria-current="true"{% endif %}>{% if category.image_file_id %}<img src="{% url 'site_image' category.image_file_id %}" alt="">{% endif %}{{ category.name }}</a>{% endfor %}
+  </nav>
+  <div class="shop-results-heading"><div><h2>{% if request.GET.q %}Hasil untuk “{{ request.GET.q }}”{% elif selected_category %}{{ selected_category.name }}{% elif selected_species %}Kebutuhan {{ selected_species.name|lower }}{% else %}Semua produk{% endif %}</h2><span>{{ page.paginator.count }} produk</span></div>{% if request.GET.q or selected_species or selected_category %}<a class="text-link" href="{% url 'catalog' %}">{% icon 'close' %} Reset filter</a>{% endif %}</div>
+  {% if reset_category %}<p class="notice info">Kategori disesuaikan dengan jenis hewan pilihan Anda.</p>{% endif %}
+  <div class="shop-grid">{% for product in page %}{% include 'public/product_card.html' %}{% empty %}<div class="empty-state">{% icon 'search' %}<h3>Produk belum ditemukan</h3><p>Coba nama lain atau ubah filter pencarian.</p><a class="button secondary" href="{% url 'catalog' %}">Lihat semua produk</a></div>{% endfor %}</div>
+  {% include 'pagination.html' %}
+  {% if site_content.shop and not selected_species and not selected_category and not request.GET.q %}
+  <div class="shop-intro">
+    <div><h2>{{ site_content.shop.heading }}</h2>{% if site_content.shop.body %}<p>{{ site_content.shop.body }}</p>{% endif %}</div>
+    {% content_image site_content.shop as shop_image %}{% if shop_image %}<img src="{{ shop_image }}" alt="{{ site_content.shop.image_alt }}">{% endif %}
+  </div>
+  {% endif %}
+
+</section>
+{% endblock %}

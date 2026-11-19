@@ -41,6 +41,7 @@ def pets_view(request, pk=None):
             ),
             "form": form,
             "editing": pet,
+            "show_form": bool(pet or request.GET.get("baru") or request.method == "POST"),
         },
     )
 
@@ -81,6 +82,7 @@ def addresses_view(request, pk=None):
             ),
             "form": form,
             "editing": address,
+            "show_form": bool(address or request.GET.get("baru") or request.method == "POST"),
         },
     )
 

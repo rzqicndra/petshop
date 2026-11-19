@@ -1,44 +1,50 @@
-{% extends 'base.html' %}{% load static sinau %}{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
-{% endblock %}
-{% block title %}Alamat pengiriman · {{ store_settings.business_name|default:"Sinau Satwa" }}
-{% endblock %}
+{% extends 'base.html' %}{% load static sinau %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block title %}Alamat pengiriman · {{ store_settings.business_name }}{% endblock %}
 {% block content %}
-{% include 'customers/account_nav.html' %}
-<div class="page-heading">
-<div>
-<p class="eyebrow">AKUN SAYA</p>
-<h1>Alamat pengiriman</h1>
-<p>Simpan alamat, kontak penerima, dan titik pengantaran.</p>
-</div><a class="button small" href="{% url 'addresses' %}?baru=1#address-form">{% icon 'plus' %} Tambah alamat</a>
-</div>
-<div class="address-layout">
-<section class="address-list">{% for address in addresses %}<article class="address-card">
-<div class="address-card-heading"><span class="master-icon">{% icon 'home' %}</span>
-<h2>{{ address.label }}</h2>{% if address.is_default %}<span class="badge green">Utama</span>{% endif %}</div>
-<p class="recipient"><strong>{{ address.recipient_name }}</strong><span>{{ address.recipient_phone }}</span>
-</p>
-<p>{{ address.address_line }}<br>{{ address.village }}{% if address.village %}, {% endif %}{{ address.district }}, {{ address.city }}<br>{{ address.province }} {{ address.postal_code }}</p>{% if address.delivery_note %}<p class="address-note">Patokan: {{ address.delivery_note }}</p>{% endif %}<div class="address-actions"><a class="text-link" href="{% url 'address_edit' address.pk %}#address-form">{% icon 'edit' %} Edit alamat</a>
-<form method="post" action="{% url 'address_delete' address.pk %}" data-confirm="Hapus alamat {{ address.label }}? Alamat pada pesanan sebelumnya tetap tersimpan.">{% csrf_token %}<button class="text-link danger-text" type="submit">{% icon 'trash' %} Hapus</button>
-</form>
-</div>
-</article>{% empty %}<div class="empty-state">{% icon 'pin' %}<h3>Ke mana pesanan Anda dikirim?</h3>
-<p>Tambahkan alamat pertama agar checkout berikutnya lebih mudah.</p>
-</div>{% endfor %}</section>
-<details class="panel address-editor" id="address-form" {% if editing or not addresses or request.GET.baru or form.errors %}open{% endif %}>
-<summary>{% icon 'pin' %} {% if editing %}Edit alamat{% else %}Tambah alamat{% endif %}</summary>
-<div class="editor-body">
-<p class="small muted">Klik peta atau geser pin ke lokasi penerima. Lengkapi alamat agar kurir mudah menemukannya.</p>
-<button class="button secondary small" type="button" id="use-location">{% icon 'pin' %} Gunakan lokasi saya</button>
-<div id="delivery-map" class="map-canvas" aria-label="Pilih titik pengantaran">
-</div>
-<p id="map-notice" class="notice info" role="status" hidden>
-</p>
-<form method="post" class="stack-form form-grid">{% csrf_token %}{% include 'includes_form.html' %}<div class="form-actions">
-<button class="button" type="submit">{% icon 'check' %} Simpan alamat</button>{% if editing %}<a class="text-link" href="{% url 'addresses' %}">Batal</a>{% endif %}</div>
-</form>
-</div>
-</details>
+<div class="personal-page">
+  {% include 'customers/account_nav.html' %}
+  <header class="compact-heading"><div><h1>{% if show_form %}{% if editing %}Edit alamat{% else %}Tambah alamat{% endif %}{% else %}Alamat pengiriman{% endif %}</h1><p>{% if show_form %}Lengkapi alamat dan tandai lokasi penerima pada peta.{% else %}Kelola alamat yang digunakan saat belanja.{% endif %}</p></div>{% if not show_form %}<a class="button" href="{% url 'addresses' %}?baru=1">{% icon 'plus' %} Tambah alamat</a>{% endif %}</header>
+  {% if show_form %}
+  <form method="post" class="address-edit-form account-form" id="address-form">
+    {% csrf_token %}{{ form.non_field_errors }}
+    <div class="address-form-columns">
+      <section class="account-card"><div class="form-section-heading"><h2>Penerima & alamat</h2><p>Tanda * wajib diisi.</p></div>
+        <div class="compact-fields">
+          {% include 'includes/account_field.html' with field=form.recipient_name %}
+          {% include 'includes/account_field.html' with field=form.recipient_phone %}
+          {% include 'includes/account_field.html' with field=form.address_line %}
+          {% include 'includes/account_field.html' with field=form.province %}
+          {% include 'includes/account_field.html' with field=form.city %}
+          {% include 'includes/account_field.html' with field=form.district %}
+          {% include 'includes/account_field.html' with field=form.village %}
+          {% include 'includes/account_field.html' with field=form.postal_code %}
+          {% include 'includes/account_field.html' with field=form.label %}
+          {% include 'includes/account_field.html' with field=form.delivery_note %}
+          {% include 'includes/account_field.html' with field=form.is_default %}
+        </div>
+      </section>
+      <section class="account-card address-pin-panel"><div class="card-heading"><h2>Titik pengantaran</h2>{% icon 'pin' %}</div><p class="card-description">Klik peta atau geser pin tepat ke lokasi penerima.</p>
+        <button class="button secondary" type="button" id="use-location">{% icon 'pin' %} Gunakan lokasi saya</button>
+        <div id="delivery-map" class="map-canvas" aria-label="Pilih titik pengantaran"></div><p id="map-notice" class="notice info" role="status" hidden></p>
+        {% include 'includes/account_field.html' with field=form.pin_confirmed %}
+        <details class="coordinate-details" {% if form.latitude.errors or form.longitude.errors %}open{% endif %}><summary>Isi koordinat secara manual {% icon 'chevron' %}</summary><div class="compact-fields disclosure-body">{% include 'includes/account_field.html' with field=form.latitude %}{% include 'includes/account_field.html' with field=form.longitude %}</div></details>
+      </section>
+    </div>
+    <div class="account-form-actions"><button class="button" type="submit">Simpan alamat</button><a class="button secondary" href="{% url 'addresses' %}">Batal</a></div>
+  </form>
+  {% else %}
+  <div class="saved-addresses">{% for address in addresses %}
+    <article class="account-card saved-address">
+      <div class="card-heading"><h2>{% icon 'home' %} {{ address.label }}</h2>{% if address.is_default %}<span class="badge green">Alamat utama</span>{% endif %}</div>
+      <div class="saved-recipient"><strong>{{ address.recipient_name }}</strong><span>{{ address.recipient_phone }}</span></div>
+      <p>{{ address.address_line }}<br>{{ address.village }}{% if address.village %}, {% endif %}{{ address.district }}, {{ address.city }}, {{ address.province }} {{ address.postal_code }}</p>
+      {% if address.delivery_note %}<p class="saved-note">Patokan · {{ address.delivery_note }}</p>{% endif %}
+      <div class="saved-address-actions"><a class="text-link" href="{% url 'address_edit' address.pk %}">{% icon 'edit' %} Edit alamat</a><form method="post" action="{% url 'address_delete' address.pk %}" data-confirm="Hapus alamat {{ address.label }}?">{% csrf_token %}<button class="text-link danger-text" type="submit">{% icon 'trash' %} Hapus</button></form></div>
+    </article>
+    {% empty %}<div class="empty-state account-empty">{% icon 'pin' %}<h2>Tambahkan alamat pengiriman</h2><p>Simpan alamat dan lokasi penerima untuk memudahkan checkout.</p><a class="button" href="{% url 'addresses' %}?baru=1">{% icon 'plus' %} Tambah alamat</a></div>{% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
-{% block scripts %}{{ map_config|json_script:'map-config' }}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/maps.js' %}" defer></script>
-{% endblock %}
+{% block scripts %}{% if show_form %}{{ map_config|json_script:'map-config' }}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/maps.js' %}" defer></script>{% endif %}{% endblock %}

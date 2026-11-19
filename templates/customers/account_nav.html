@@ -1,5 +1,5 @@
-{% if not staff_workspace %}<nav class="account-tabs" aria-label="Pengaturan akun">
-<a href="{% url 'profile' %}" {% if request.resolver_match.url_name == 'profile' %}aria-current="page"{% endif %}>Profil & kontak</a>
-<a href="{% url 'addresses' %}" {% if 'address' in request.resolver_match.url_name %}aria-current="page"{% endif %}>Alamat pengiriman</a>
+<nav class="account-tabs" aria-label="Pengaturan akun">
+{% if staff_workspace %}<a href="{% url 'account_profile' %}" {% if request.resolver_match.url_name == 'account_profile' %}aria-current="page"{% endif %}>Profil saya</a>
+{% else %}<a href="{% url 'profile' %}" {% if request.resolver_match.url_name == 'profile' %}aria-current="page"{% endif %}>Profil & kontak</a><a href="{% url 'addresses' %}" {% if 'address' in request.resolver_match.url_name %}aria-current="page"{% endif %}>Alamat pengiriman</a>{% endif %}
 <a href="{% url 'security' %}" {% if request.resolver_match.url_name == 'security' %}aria-current="page"{% endif %}>Keamanan akun</a>
-</nav>{% endif %}
+</nav>

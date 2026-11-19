@@ -15,6 +15,7 @@ from core import operations
 from core.master import master_center
 
 urlpatterns = [
+    path("akun/profil/", accounts.account_profile, name="account_profile"),
     path("profil/kontak/<uuid:pk>/hapus/", customers.emergency_delete, name="emergency_delete"),
     path("media/website/<uuid:pk>/", core.site_image, name="site_image"),
     path("produk/<uuid:pk>/", core.product_detail, name="product_detail"),

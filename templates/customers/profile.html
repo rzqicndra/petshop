@@ -1,37 +1,18 @@
-{% extends 'base.html' %}{% load sinau %}{% block title %}Profil & kontak · {{ store_settings.business_name|default:"Sinau Satwa" }}
-{% endblock %}
+{% extends 'base.html' %}{% load sinau %}
+{% block title %}Profil & kontak · {{ store_settings.business_name }}{% endblock %}
 {% block content %}
-{% include 'customers/account_nav.html' %}
-<div class="page-heading">
-<div>
-<p class="eyebrow">AKUN SAYA</p>
-<h1>Profil & kontak</h1>
-<p>Informasi yang membantu kami menghubungi Anda saat dibutuhkan.</p>
-</div>
-</div>
-<div class="profile-grid">
-<section class="panel">
-<div class="profile-summary"><span class="avatar large">{{ request.user.full_name|initials }}</span>
-<div>
-<h2>{{ request.user.full_name }}</h2>
-<p>{{ request.user.email }}</p><span class="badge green">{% icon 'check' %} Email terverifikasi</span>
-</div>
-</div>
-<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="profile">{% include 'includes_form.html' %}<button class="button" type="submit">Simpan perubahan</button>
-</form>
-</section>
-<section class="panel">
-<div class="panel-title">
-<h2>Kontak darurat</h2>{% icon 'heart' %}</div>
-<p class="small muted">Orang yang dapat dihubungi ketika hewan Anda membutuhkan penanganan segera.</p>{% for contact in contacts %}<div class="contact-row"><span class="avatar">{{ contact.name|initials }}</span>
-<div><strong>{{ contact.name }}</strong>
-<p>{{ contact.relationship }} · {{ contact.phone }}</p><small>{% if contact.contact_consent %}Bersedia dihubungi{% else %}Persetujuan belum diberikan{% endif %}</small>
-</div><form method="post" action="{% url 'emergency_delete' contact.pk %}" data-confirm="Hapus kontak darurat ini dari profil Anda? Kontak pada penitipan sebelumnya tetap tersimpan.">{% csrf_token %}<button type="submit" class="icon-button danger-text" aria-label="Hapus kontak {{ contact.name }}">{% icon 'trash' %}</button></form>
-</div>{% endfor %}<details class="block-form" {% if not contacts or emergency_form.errors %}open{% endif %}>
-<summary>{% icon 'plus' %} Tambah kontak darurat</summary>
-<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="emergency">{% include 'includes_form.html' with form=emergency_form %}<button class="button secondary" type="submit">Simpan kontak</button>
-</form>
-</details>
-</section>
+<div class="personal-page">
+  {% include 'customers/account_nav.html' %}
+  <header class="compact-heading"><div><h1>Profil & kontak</h1><p>Perbarui informasi Anda dan orang yang bisa dihubungi saat darurat.</p></div></header>
+  <div class="account-columns">
+    <section class="account-card">
+      <div class="account-identity"><span class="avatar">{{ request.user.full_name|initials }}</span><div><h2>{{ request.user.full_name }}</h2><p>{{ request.user.email }}</p></div>{% if request.user.email_verified_at %}<span class="badge green">{% icon 'check' %} Terverifikasi</span>{% endif %}</div>
+      <form method="post" class="account-form">{% csrf_token %}<input type="hidden" name="action" value="profile">{{ form.non_field_errors }}<div class="compact-fields">{% include 'includes/account_field.html' with field=form.name %}{% include 'includes/account_field.html' with field=form.phone %}</div><div class="account-form-actions"><button class="button" type="submit">Simpan perubahan</button></div></form>
+    </section>
+    <section class="account-card emergency-panel"><div class="card-heading"><h2>Kontak darurat</h2>{% icon 'heart' %}</div><p class="card-description">Kami hubungi jika hewan Anda membutuhkan penanganan segera.</p>
+      <div class="emergency-list">{% for contact in contacts %}<div class="emergency-item"><span class="avatar">{{ contact.name|initials }}</span><div><strong>{{ contact.name }}</strong><p>{% if contact.relationship %}{{ contact.relationship }} · {% endif %}{{ contact.phone }}</p><small>{% if contact.contact_consent %}Bersedia dihubungi{% else %}Persetujuan belum diberikan{% endif %}</small></div><form method="post" action="{% url 'emergency_delete' contact.pk %}" data-confirm="Hapus kontak darurat {{ contact.name }}?">{% csrf_token %}<button type="submit" class="icon-button danger-text" aria-label="Hapus kontak {{ contact.name }}" title="Hapus kontak">{% icon 'trash' %}</button></form></div>{% empty %}<p class="account-empty-note">Belum ada kontak darurat.</p>{% endfor %}</div>
+      <details class="account-disclosure" {% if emergency_form.errors %}open{% endif %}><summary>{% icon 'plus' %} Tambah kontak darurat {% icon 'chevron' %}</summary><form method="post" class="account-form disclosure-body">{% csrf_token %}<input type="hidden" name="action" value="emergency">{{ emergency_form.non_field_errors }}<div class="compact-fields">{% for field in emergency_form %}{% include 'includes/account_field.html' %}{% endfor %}</div><div class="account-form-actions"><button class="button" type="submit">Simpan kontak</button></div></form></details>
+    </section>
+  </div>
 </div>
 {% endblock %}

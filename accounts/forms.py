@@ -4,6 +4,20 @@ from django.core.exceptions import ValidationError
 from .models import User
 
 
+class AccountProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["full_name"]
+        labels = {"full_name": "Nama lengkap"}
+        widgets = {"full_name": forms.TextInput(attrs={"autocomplete": "name"})}
+
+    def clean_full_name(self):
+        value = self.cleaned_data["full_name"].strip()
+        if not value:
+            raise forms.ValidationError("Isi nama lengkap Anda.")
+        return value
+
+
 class LoginForm(forms.Form):
     email = forms.EmailField(
         label="Email", max_length=254, widget=forms.EmailInput(attrs={"autocomplete": "username"})

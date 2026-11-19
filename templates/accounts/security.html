@@ -1,86 +1,36 @@
-{% extends 'base.html' %}{% load sinau %}{% block title %}Keamanan akun · {{ store_settings.business_name|default:"Sinau Satwa" }}
-{% endblock %}
+{% extends 'base.html' %}{% load sinau %}
+{% block title %}Keamanan akun · {{ store_settings.business_name }}{% endblock %}
 {% block content %}
-{% include 'customers/account_nav.html' %}
-<div class="page-heading">
-<div>
-<p class="eyebrow">AKUN SAYA</p>
-<h1>Keamanan akun</h1>
-<p>Atur cara Login dan tambahkan perlindungan untuk akun Anda.</p>
-</div><span class="badge green">{% icon 'shield' %} Email terverifikasi</span>
-</div>
-<div class="security-layout">
-<section class="panel">
-<div class="security-title"><span class="master-icon">{% icon 'lock' %}</span>
-<div>
-<h2>Password</h2>
-<p>Perbarui password melalui verifikasi email.</p>
-</div>
-</div><a class="button secondary small" href="{% url 'forgot_password' %}">Ubah password {% icon 'arrow' %}</a><hr>
-<div class="security-title"><span class="master-icon">{% icon 'google' %}</span>
-<div>
-<h2>Login dengan Google</h2>
-<p>{% if google_linked %}Akun Google sudah terhubung.{% else %}Login lebih cepat dengan akun Google Anda.{% endif %}</p>
-</div>
-</div>{% if google_linked %}<span class="badge green">{% icon 'check' %} Terhubung</span>{% elif google_enabled %}<details>
-<summary>Hubungkan akun Google</summary>
-<form method="post" action="{% url 'google_link' %}" class="stack-form">{% csrf_token %}<div class="field">
-<label for="link-password">Konfirmasi password akun</label>
-<input id="link-password" name="password" type="password" autocomplete="current-password" required>
-</div>
-<button class="button google-button" type="submit">{% icon 'google' %} Hubungkan Google</button>
-</form>
-</details>{% else %}<p class="small muted">Login Google belum tersedia. Anda tetap dapat Login dengan email dan password.</p>{% endif %}</section>
-<section class="panel">
-<div class="security-title"><span class="master-icon">{% icon 'shield' %}</span>
-<div>
-<h2>Verifikasi dua langkah</h2>
-<p>Kode tambahan dari aplikasi autentikator saat Login.</p>
-</div>
-</div>{% if security.enabled_at %}<div class="security-success">{% icon 'check' %}<div><strong>Perlindungan tambahan aktif</strong>
-<p>Akun Anda memerlukan kode autentikator setelah Login.</p>
-</div>
-</div>{% if not staff_workspace %}<details>
-<summary>Nonaktifkan verifikasi dua langkah</summary>
-<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="disable">
-<div class="field">
-<label for="disable-password">Password saat ini</label>
-<input type="password" id="disable-password" name="password" autocomplete="current-password" required>
-</div>
-<div class="field">
-<label for="disable-code">Kode autentikator atau kode pemulihan</label>
-<input id="disable-code" name="code" autocomplete="one-time-code" required>
-</div>
-<button class="button danger" type="submit">Nonaktifkan</button>
-</form>
-</details>{% endif %}{% elif totp_secret %}<ol class="setup-steps">
-<li>Buka aplikasi Google Authenticator atau Microsoft Authenticator.</li>
-<li>Tambahkan akun lalu scan kode QR ini.</li>
-<li>Masukkan kode 6 digit untuk menyelesaikan pengaturan.</li>
-</ol>
-<div class="authenticator-qr">{{ totp_qr|safe }}</div>
-<details>
-<summary>Tidak bisa scan? Gunakan kunci manual</summary><code class="secret-key">{{ totp_secret }}</code>
-</details>
-<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="confirm">
-<div class="field">
-<label for="setup-code">Kode 6 digit</label>
-<input class="otp-input" id="setup-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
-</div>
-<button class="button" type="submit">Aktifkan perlindungan</button>
-</form>{% else %}<p class="small muted">Kami sarankan fitur ini untuk semua akun. Staf wajib mengaktifkannya sebelum menggunakan sistem produksi.</p>
-<details {% if staff_workspace %}open{% endif %}>
-<summary>{% icon 'plus' %} Aktifkan verifikasi dua langkah</summary>
-<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="begin">
-<div class="field">
-<label for="setup-password">Konfirmasi password</label>
-<input type="password" id="setup-password" name="password" autocomplete="current-password" required>
-</div>
-<button class="button" type="submit">Lanjutkan pengaturan {% icon 'arrow' %}</button>
-</form>
-</details>{% endif %}{% if recovery_codes %}<div class="notice"><strong>Simpan kode pemulihan Anda.</strong>
-<p>Kode ini hanya ditampilkan sekarang. Simpan di tempat privat; setiap kode hanya bisa dipakai sekali.</p>
-<div class="recovery-grid">{% for code in recovery_codes %}<code>{{ code }}</code>{% endfor %}</div>
-</div>{% endif %}</section>
+<div class="personal-page">
+  {% include 'customers/account_nav.html' %}
+  <header class="compact-heading"><div><h1>Keamanan akun</h1><p>Kelola password, Login Google, dan verifikasi dua langkah.</p></div></header>
+  <div class="account-columns security-columns">
+    <section class="account-card security-methods">
+      <h2>Metode Login</h2>
+      <div class="security-method"><span class="account-symbol">{% icon 'lock' %}</span><div><h3>Password</h3><p>Gunakan kode verifikasi email untuk mengubah password.</p><a class="button secondary" href="{% url 'forgot_password' %}">Ubah password</a></div></div>
+      <div class="security-method"><span class="account-symbol">{% icon 'google' %}</span><div><h3>Google</h3>
+        {% if google_linked %}<p>Akun Google sudah terhubung.</p><span class="badge green">{% icon 'check' %} Terhubung</span>
+        {% elif google_enabled %}<p>Hubungkan akun untuk Login dengan Google.</p><details class="account-disclosure"><summary>Hubungkan Google {% icon 'chevron' %}</summary><form method="post" action="{% url 'google_link' %}" class="account-form disclosure-body">{% csrf_token %}<div class="field"><label for="link-password">Konfirmasi password akun</label><input id="link-password" name="password" type="password" autocomplete="current-password" required></div><button class="button google-button" type="submit">{% icon 'google' %} Hubungkan Google</button></form></details>
+        {% else %}<p>Login Google belum tersedia. Gunakan email dan password Anda.</p>{% endif %}
+      </div>
+    </section>
+    <section class="account-card security-verification">
+      <div class="card-heading"><h2>Verifikasi dua langkah</h2><span class="account-symbol">{% icon 'shield' %}</span></div>
+      <p class="card-description">Tambahkan kode dari aplikasi autentikator saat Login.</p>
+      {% if security.enabled_at %}
+        <div class="security-enabled">{% icon 'check' %}<div><strong>Aktif</strong><p>Akun Anda sudah memakai perlindungan tambahan.</p></div></div>
+        {% if not staff_workspace %}<details class="account-disclosure"><summary>Nonaktifkan verifikasi {% icon 'chevron' %}</summary><form method="post" class="account-form disclosure-body">{% csrf_token %}<input type="hidden" name="action" value="disable"><div class="field"><label for="disable-password">Password saat ini</label><input type="password" id="disable-password" name="password" autocomplete="current-password" required></div><div class="field"><label for="disable-code">Kode autentikator atau kode pemulihan</label><input id="disable-code" name="code" autocomplete="one-time-code" required></div><button class="button danger" type="submit">Nonaktifkan</button></form></details>{% endif %}
+      {% elif totp_secret %}
+        <ol class="authenticator-steps"><li>Buka aplikasi Google Authenticator atau Microsoft Authenticator.</li><li>Tambahkan akun dan scan kode QR.</li><li>Masukkan kode 6 digit dari aplikasi.</li></ol>
+        <div class="authenticator-qr">{{ totp_qr|safe }}</div>
+        <details class="account-disclosure"><summary>Gunakan kunci manual {% icon 'chevron' %}</summary><code class="secret-key">{{ totp_secret }}</code></details>
+        <form method="post" class="account-form">{% csrf_token %}<input type="hidden" name="action" value="confirm"><div class="field"><label for="setup-code">Kode 6 digit</label><input class="otp-input" id="setup-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></div><button class="button" type="submit">Aktifkan verifikasi</button></form>
+      {% else %}
+        <p class="account-empty-note">Belum aktif{% if staff_workspace and staff_mfa_required %} · Wajib untuk akun staf{% endif %}</p>
+        <details class="account-disclosure"><summary>{% icon 'plus' %} Aktifkan verifikasi {% icon 'chevron' %}</summary><form method="post" class="account-form disclosure-body">{% csrf_token %}<input type="hidden" name="action" value="begin"><p>Siapkan aplikasi autentikator di ponsel Anda.</p><div class="field"><label for="setup-password">Konfirmasi password</label><input type="password" id="setup-password" name="password" autocomplete="current-password" required></div><button class="button" type="submit">Lanjutkan pengaturan</button></form></details>
+      {% endif %}
+      {% if recovery_codes %}<div class="notice"><strong>Simpan kode pemulihan Anda</strong><p>Setiap kode hanya dapat dipakai sekali. Simpan di tempat privat.</p><div class="recovery-grid">{% for code in recovery_codes %}<code>{{ code }}</code>{% endfor %}</div></div>{% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}

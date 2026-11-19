@@ -371,3 +371,22 @@ if (invoicePoll) {
   };
   setTimeout(poll, 10000);
 }
+
+// Keep weekly hours easy to dismiss while preserving the customer's current form.
+const shopHours = document.querySelector("[data-store-hours]");
+document.addEventListener("click", (event) => {
+  if (shopHours?.open && !shopHours.contains(event.target)) shopHours.open = false;
+});
+shopHours?.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    shopHours.open = false;
+    shopHours.querySelector("summary").focus();
+  }
+});
+// Reveal manual coordinate fields when native validation needs the user's attention.
+document.querySelectorAll(".personal-page form").forEach((form) => {
+  form.addEventListener("invalid", (event) => {
+    const section = event.target.closest("details");
+    if (section) section.open = true;
+  }, true);
+});

@@ -1,33 +1,41 @@
-{% extends 'base.html' %}{% load sinau %}{% block title %}Hewan saya · {{ store_settings.business_name|default:"Sinau Satwa" }}
-{% endblock %}
+{% extends 'base.html' %}{% load sinau %}
+{% block title %}Hewan saya · {{ store_settings.business_name }}{% endblock %}
 {% block content %}
-<div class="page-heading">
-<div>
-<p class="eyebrow">PERAWATAN MEREKA</p>
-<h1>Hewan saya</h1>
-<p>Profil dan kebutuhan khusus hewan kesayangan Anda.</p>
-</div><a class="button small" href="#pet-form">{% icon 'plus' %} Tambah hewan</a>
-</div>
-<div class="profile-grid">
-<section class="pet-list">{% for pet in pets %}<article class="pet-card">
-<div class="pet-portrait">{% if pet.photo_file %}<img src="{% url 'file_download' pet.photo_file_id %}" alt="{{ pet.name }}">{% else %}{% icon 'paw' %}{% endif %}</div>
-<div class="pet-info"><span class="eyebrow">{{ pet.species.name }}</span>
-<h2>{{ pet.name }}</h2>
-<p>{{ pet.breed|default:'Ras belum diisi' }} · {{ pet.get_sex_display }}</p>{% if pet.weight_kg %}<span class="small muted">{{ pet.weight_kg|floatformat:1 }} kg</span>{% endif %}</div>
-<div class="pet-actions"><a class="icon-button" href="{% url 'pet_edit' pet.pk %}#pet-form" aria-label="Edit {{ pet.name }}">{% icon 'edit' %}</a>
-<form method="post" action="{% url 'pet_delete' pet.pk %}" data-confirm="Hapus {{ pet.name }} dari daftar hewan? Riwayat perawatan tetap tersimpan.">{% csrf_token %}<button class="icon-button danger-text" type="submit" aria-label="Hapus {{ pet.name }}">{% icon 'trash' %}</button>
-</form>
-</div>
-</article>{% empty %}<div class="empty-state">{% icon 'paw' %}<h3>Kenalkan sahabat Anda.</h3>
-<p>Tambahkan profil hewan untuk mulai booking dan menyimpan riwayat perawatannya.</p>
-</div>{% endfor %}</section>
-<section class="panel" id="pet-form">
-<div class="panel-title">
-<h2>{% if editing %}Edit {{ editing.name }}{% else %}Tambah hewan{% endif %}</h2>{% if editing %}<a class="text-link" href="{% url 'pets' %}">Batal</a>{% endif %}</div>
-<form method="post" enctype="multipart/form-data" class="stack-form form-grid">{% csrf_token %}{% include 'includes_form.html' %}<div class="form-actions">
-<button class="button" type="submit">{% icon 'check' %} Simpan profil hewan</button>
-</div>
-</form>
-</section>
+<div class="personal-page">
+  <header class="compact-heading">
+    <div>{% if show_form %}<a class="back-link" href="{% url 'pets' %}">Hewan saya</a><h1>{% if editing %}Edit profil {{ editing.name }}{% else %}Tambah hewan{% endif %}</h1><p>Lengkapi identitas dan kebutuhan perawatannya.</p>{% else %}<h1>Hewan saya</h1><p>Kelola profil hewan untuk booking dan perawatan.</p>{% endif %}</div>
+    {% if not show_form %}<a class="button" href="{% url 'pets' %}?baru=1">{% icon 'plus' %} Tambah hewan</a>{% endif %}
+  </header>
+  {% if show_form %}
+  <section class="account-card pet-editor" id="pet-form">
+    <form method="post" enctype="multipart/form-data" class="account-form">
+      {% csrf_token %}{{ form.non_field_errors }}
+      <div class="form-section-heading"><h2>Identitas hewan</h2><p>Tanda * wajib diisi.</p></div>
+      <div class="compact-fields">
+        {% include 'includes/account_field.html' with field=form.name %}
+        {% include 'includes/account_field.html' with field=form.species %}
+        {% include 'includes/account_field.html' with field=form.breed %}
+        {% include 'includes/account_field.html' with field=form.sex %}
+        {% include 'includes/account_field.html' with field=form.birth_date %}
+        {% include 'includes/account_field.html' with field=form.weight_kg %}
+        {% include 'includes/account_field.html' with field=form.estimated_birth_date %}
+      </div>
+      <details class="account-disclosure" {% if form.allergies.value or form.handling_notes.value or form.allergies.errors or form.handling_notes.errors %}open{% endif %}>
+        <summary>Kebutuhan khusus <span>Alergi & catatan penanganan</span>{% icon 'chevron' %}</summary>
+        <div class="compact-fields disclosure-body">{% include 'includes/account_field.html' with field=form.allergies %}{% include 'includes/account_field.html' with field=form.handling_notes %}</div>
+      </details>
+      <div class="pet-photo-field">{% if editing.photo_file_id %}<img src="{% url 'file_download' editing.photo_file_id %}" alt="Foto {{ editing.name }} saat ini">{% endif %}{% include 'includes/account_field.html' with field=form.photo %}</div>
+      <div class="account-form-actions"><button class="button" type="submit">Simpan profil hewan</button><a class="button secondary" href="{% url 'pets' %}">Batal</a></div>
+    </form>
+  </section>
+  {% else %}
+  <div class="pet-cards">{% for pet in pets %}
+    <article class="animal-card">
+      <div class="animal-card-main"><div class="animal-photo">{% if pet.photo_file_id %}<img src="{% url 'file_download' pet.photo_file_id %}" alt="{{ pet.name }}">{% else %}{% icon 'paw' %}{% endif %}</div><div><h2>{{ pet.name }}</h2><p>{{ pet.species.name }}{% if pet.breed %} · {{ pet.breed }}{% endif %}</p><span>{{ pet.get_sex_display }}{% if pet.weight_kg %} · {{ pet.weight_kg|floatformat:1 }} kg{% endif %}</span></div></div>
+      <div class="animal-card-actions"><a href="{% url 'new_booking' %}?pet={{ pet.pk }}" class="text-link">{% icon 'calendar' %} Booking layanan</a><a href="{% url 'pet_edit' pet.pk %}" class="text-link" aria-label="Edit {{ pet.name }}">{% icon 'edit' %} Edit</a><form method="post" action="{% url 'pet_delete' pet.pk %}" data-confirm="Hapus {{ pet.name }} dari daftar hewan? Riwayat perawatan tetap tersimpan.">{% csrf_token %}<button type="submit" class="text-link danger-text" aria-label="Hapus {{ pet.name }}">{% icon 'trash' %} Hapus</button></form></div>
+    </article>
+    {% empty %}<div class="empty-state account-empty">{% icon 'paw' %}<h2>Tambahkan hewan pertama Anda</h2><p>Profil hewan membantu tim menyiapkan perawatan yang sesuai.</p><a class="button" href="{% url 'pets' %}?baru=1">{% icon 'plus' %} Tambah hewan</a></div>{% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

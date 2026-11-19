@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% load sinau %}
+{% block title %}Profil saya · {{ store_settings.business_name }}{% endblock %}
+{% block content %}
+<div class="personal-page">
+  {% include 'customers/account_nav.html' %}
+  <header class="compact-heading"><div><h1>Profil saya</h1><p>Informasi akun yang Anda gunakan untuk bekerja.</p></div></header>
+  <div class="account-columns staff-account-columns">
+    <section class="account-card">
+      <div class="account-identity"><span class="avatar">{{ request.user.full_name|initials }}</span><div><h2>{{ request.user.full_name }}</h2><p>{{ workspace_label }}</p></div></div>
+      <form method="post" class="account-form">{% csrf_token %}{{ form.non_field_errors }}{% include 'includes/account_field.html' with field=form.full_name %}<div class="account-readonly"><span>Email akun</span><strong>{{ request.user.email }}</strong>{% if request.user.email_verified_at %}<small>{% icon 'check' %} Email terverifikasi</small>{% endif %}</div><div class="account-form-actions"><button class="button" type="submit">Simpan perubahan</button></div></form>
+    </section>
+    <aside class="account-card account-help"><span class="account-symbol">{% icon 'shield' %}</span><h2>Keamanan akun kerja</h2><p>Kelola password dan verifikasi dua langkah untuk melindungi akses Anda.</p><a class="button secondary" href="{% url 'security' %}">Buka keamanan akun</a></aside>
+  </div>
+</div>
+{% endblock %}

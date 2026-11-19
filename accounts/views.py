@@ -18,7 +18,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from core.services import BusinessError, audit, cipher
-from .forms import LoginForm, RegisterForm, EmailForm, OTPForm, ResetForm
+from .forms import LoginForm, RegisterForm, EmailForm, OTPForm, ResetForm, AccountProfileForm
 from .models import User, ExternalIdentity, AccountSecurity
 from .permissions import active_role, user_roles, workspace_url, verified_login
 from .services import rate_limit, create_customer_user, issue_otp, verify_otp, verify_totp
@@ -391,6 +391,21 @@ def mfa_login(request):
         except BusinessError as exc:
             error = exc.messages[0]
     return render(request, "accounts/mfa.html", {"error": error})
+
+
+@verified_login
+def account_profile(request):
+    if active_role(request.user) == "CUSTOMER":
+        return redirect("profile")
+    form = AccountProfileForm(request.POST or None, instance=request.user)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            request.user.full_name = form.cleaned_data["full_name"]
+            request.user.save(update_fields=["full_name", "updated_at"])
+            audit(request.user, "account.profile_updated", request.user)
+        messages.success(request, "Profil Anda disimpan.")
+        return redirect("account_profile")
+    return render(request, "accounts/profile.html", {"form": form})
 
 
 @verified_login

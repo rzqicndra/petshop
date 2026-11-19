@@ -1,0 +1,20 @@
+{% load sinau %}
+{% if not staff_workspace %}
+<details class="store-hours" data-store-hours>
+  <summary>
+    {% icon 'store' %}
+    {% if store_hours.published %}
+      <strong class="{% if store_hours.is_open %}hours-open{% else %}hours-closed{% endif %}">{% if store_hours.is_open %}Buka sekarang{% else %}Tutup sekarang{% endif %}</strong>
+      <span class="hours-summary">{% if store_hours.is_open %}Hari ini {{ store_hours.today_hours }} {{ store_hours.zone }}{% else %}{{ store_hours.next_opening|default:store_hours.today_hours }}{% endif %}</span>
+    {% else %}<strong>Jam operasional toko</strong>{% endif %}
+    <span class="hours-expand">Lihat jadwal {% icon 'chevron' %}</span>
+  </summary>
+  <div class="hours-popover">
+    <div class="hours-heading"><strong>Jam operasional</strong><small>{{ store_hours.zone }}</small></div>
+    {% if store_hours.published %}
+      <dl>{% for day in store_hours.week %}<div {% if day.today %}class="hours-today"{% endif %}><dt>{{ day.name }}{% if day.today %}<small>Hari ini</small>{% endif %}</dt><dd>{{ day.hours }}</dd></div>{% endfor %}</dl>
+    {% else %}<p>Jam operasional sedang diperbarui. Hubungi toko untuk memastikan waktu kunjungan Anda.</p>{% endif %}
+    <a class="hours-link" href="{% url 'timetable' %}">{% icon 'calendar' %} Jadwal dokter & layanan</a>
+  </div>
+</details>
+{% endif %}

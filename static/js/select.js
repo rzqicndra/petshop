@@ -75,11 +75,13 @@
       if (current?.select === select) current = null;
       if (focus) trigger.focus();
     }
+    const optionLabel = (option) =>
+      option.textContent.trim().replace(/^[-—]*$/, "Pilih opsi");
     function render() {
       trigger.disabled = select.disabled;
       value.textContent =
         [...select.selectedOptions]
-          .map((o) => (o.value ? o.textContent : "Pilih opsi"))
+          .map(optionLabel)
           .join(", ") || "Pilih opsi";
       trigger.setAttribute("aria-required", String(select.required));
       list.replaceChildren();
@@ -89,7 +91,7 @@
         row.id = id + "-option-" + index;
         row.tabIndex = -1;
         row.dataset.index = index;
-        row.textContent = option.value ? option.textContent : "Pilih opsi";
+        row.textContent = optionLabel(option);
         row.setAttribute("aria-selected", String(option.selected));
         row.setAttribute("aria-disabled", String(option.disabled));
         row.hidden = option.hidden;

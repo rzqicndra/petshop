@@ -93,7 +93,7 @@ class FreeMapPagesTests(TestCase):
 
     def test_address_page_has_local_leaflet_and_attribution_without_google_maps_scripts(self):
         login_as(self.client, self.user)
-        response = self.client.get("/alamat/")
+        response = self.client.get("/alamat/?baru=1")
         self.assertContains(response, "vendor/leaflet/leaflet.js")
         self.assertContains(response, "tile.openstreetmap.org")
         self.assertContains(response, "OpenStreetMap contributors")
