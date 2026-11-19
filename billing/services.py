@@ -338,6 +338,16 @@ def fully_refunded(invoice):
     return invoice.status == "PAID" and amount >= invoice.total_rp
 
 
+def cancellation_options(invoices, role):
+    if role not in OPS | {"CUSTOMER"}:
+        return {}
+    paid = list(invoices.filter(status="PAID"))
+    if not paid:
+        return {"can_cancel": True}
+    returned = all(fully_refunded(invoice) for invoice in paid)
+    return {"paid_cancellation": True, "funds_returned": returned, "can_cancel": returned and role in OPS}
+
+
 def expire_unpaid():
     from orders.models import Order
     from inventory.services import release_order

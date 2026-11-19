@@ -1,5 +1,8 @@
 import uuid
 from django.contrib import messages
+from django.utils import timezone
+from .availability import public_timetable, slot_picker, store_calendar
+from .models import PackageSpecies
 from django.shortcuts import render, redirect, get_object_or_404
 from accounts.permissions import roles_required, verified_login, active_role, OPS
 from core.services import BusinessError
@@ -21,6 +24,10 @@ from .forms import BookingForm, ExtensionForm, RescheduleForm
 from . import services
 
 
+def timetable(request):
+    return render(request, "scheduling/timetable.html", public_timetable())
+
+
 @roles_required("CUSTOMER")
 def new_booking(request):
     customer = Customer.objects.get(user=request.user)
@@ -30,7 +37,46 @@ def new_booking(request):
         customer=customer,
         initial={"key": str(uuid.uuid4()), "package": request.GET.get("paket")},
     )
-    if request.method == "POST" and form.is_valid():
+    pets = list(form.fields["pet"].queryset.select_related("species").order_by("name", "pk"))
+    values = request.POST if request.method == "POST" else request.GET
+    requested_package = values.get("package") or values.get("paket")
+    preferred = None
+    if requested_package and pets and not values.get("pet"):
+        try:
+            package_id = uuid.UUID(requested_package)
+        except ValueError:
+            package_id = None
+        species = set(
+            PackageSpecies.objects.filter(
+                package_id=package_id,
+                package__is_active=True,
+                package__service__is_active=True,
+                species__is_active=True,
+            ).values_list("species_id", flat=True)
+        )
+        preferred = next((animal for animal in pets if animal.species_id in species), None)
+    pet = next(
+        (item for item in pets if str(item.pk) == values.get("pet")),
+        preferred or (pets[0] if pets else None),
+    )
+    packages = []
+    if pet:
+        compatible = PackageSpecies.objects.filter(
+            species=pet.species, species__is_active=True
+        ).values("package_id")
+        packages = list(
+            form.fields["package"]
+            .queryset.filter(pk__in=compatible)
+            .order_by("service__name", "name")
+        )
+    package = next((item for item in packages if str(item.pk) == requested_package), None)
+    # Only one compatible option needs no extra selection.
+    if not package and len(packages) == 1:
+        package = packages[0]
+    _, zone = store_calendar()
+    with timezone.override(zone):
+        submitted = request.method == "POST" and form.is_valid()
+    if submitted:
         try:
             data = form.cleaned_data
             contact = data.get("emergency_contact")
@@ -75,7 +121,15 @@ def new_booking(request):
     return render(
         request,
         "scheduling/new.html",
-        {"form": form, "has_pets": form.fields["pet"].queryset.exists()},
+        {
+            "form": form,
+            "pets": pets,
+            "pet": pet,
+            "packages": packages,
+            "package": package,
+            "store_zone": zone.key,
+            **slot_picker(package, pet, values.get("hari", "")),
+        },
     )
 
 
@@ -122,6 +176,7 @@ def booking_detail(request, pk):
                 "diagnosis",
                 "treatment",
                 "aftercare",
+                "inpatient_recommended",
                 "followup_at",
             )
         }
@@ -187,7 +242,16 @@ def booking_detail(request, pk):
             elif action == "finish":
                 care.finish_care(request.user, booking)
             elif action in {"intake_upload", "intake_replace"} and stay:
-                document = get_object_or_404(BoardingIntakeFile, pk=request.POST.get("document"), stay=stay, is_active=True) if action == "intake_replace" else None
+                document = (
+                    get_object_or_404(
+                        BoardingIntakeFile,
+                        pk=request.POST.get("document"),
+                        stay=stay,
+                        is_active=True,
+                    )
+                    if action == "intake_replace"
+                    else None
+                )
                 boarding.replace_intake(request.user, stay, request.FILES.get("file"), document)
             elif action == "intake_verify" and stay:
                 form = OperationForm(request.POST)
@@ -285,10 +349,25 @@ def booking_detail(request, pk):
     from boarding.models import BoardingUnit
     from engagement.models import Review
 
+    role = active_role(request.user)
+    changes = (
+        slot_picker(booking.package, booking.pet, request.GET.get("hari", ""), exclude=booking)
+        if (role == "CUSTOMER" and booking.status == "CONFIRMED" and not stay)
+        else {}
+    )
+    from billing.services import cancellation_options
+
+    cancellation = (
+        cancellation_options(Invoice.objects.filter(booking=booking), role)
+        if (booking.status in {"AWAITING_PAYMENT", "SUBMITTED", "CONFIRMED", "NEEDS_ATTENTION"})
+        else {}
+    )
     return render(
         request,
         "scheduling/detail.html",
         {
+            **changes,
+            **cancellation,
             "booking": booking,
             "visit": visit,
             "job": job,
@@ -305,7 +384,9 @@ def booking_detail(request, pk):
             "invoice": Invoice.objects.filter(booking=booking).first(),
             "extensions": extensions,
             "intake_files": (
-                BoardingIntakeFile.objects.filter(stay=stay, is_active=True).select_related("file") if stay else []
+                BoardingIntakeFile.objects.filter(stay=stay, is_active=True).select_related("file")
+                if stay
+                else []
             ),
             "care_logs": logs,
             "medical_form": medical_form,

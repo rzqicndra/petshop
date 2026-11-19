@@ -38,6 +38,18 @@ class ServicePackage(TimestampedModel):
     buffer_minutes = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
+    def clean(self):
+        super().clean()
+        from django.core.exceptions import ValidationError
+        from .availability import MAX_MINUTES
+
+        if self.service_id and self.service.kind in MAX_MINUTES:
+            limit = MAX_MINUTES[self.service.kind]
+            if not 0 < (self.duration_minutes or 0) <= limit:
+                raise ValidationError(
+                    {"duration_minutes": f"Isi durasi sesi antara 1 dan {limit} menit."}
+                )
+
     class Meta:
         constraints = [
             models.CheckConstraint(

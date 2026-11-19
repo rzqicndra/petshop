@@ -83,43 +83,71 @@ def checkout_view(request):
     form = CheckoutForm(request.POST or None, customer=customer, initial={"key": str(uuid.uuid4())})
     draft, quotes, quote_messages = None, [], []
     if request.method == "POST":
-        if request.POST.get("action") == "confirm":
+        confirm = request.POST.get("action") == "confirm"
+        if not confirm:
+            request.session.pop("checkout_draft", None)
+            request.session.pop("checkout_address", None)
+        if form.is_valid():
+            method, address = form.cleaned_data["fulfillment"], form.cleaned_data["address"]
+            address_id = str(address.pk) if method == "DELIVERY" else ""
             try:
-                draft = get_object_or_404(
-                    Order, pk=request.session.get("checkout_draft"), customer=customer
-                )
-                quote = (
-                    get_object_or_404(ShippingQuote, pk=request.POST.get("quote"), order=draft)
-                    if draft.fulfillment == "DELIVERY"
-                    else None
-                )
-                order = services.checkout(
-                    request.user,
-                    draft,
-                    request.POST.get("key", ""),
-                    quote,
-                    request.session.get("cart", {}),
-                )
-                request.session["cart"] = {}
-                request.session.pop("checkout_draft", None)
-                return redirect("order_detail", pk=order.pk)
-            except BusinessError as exc:
-                messages.error(request, exc.messages[0])
-                return redirect("checkout")
-        elif form.is_valid():
-            try:
+                if confirm:
+                    saved = request.session.get("checkout_draft")
+                    if (
+                        not saved
+                        or saved != request.POST.get("draft")
+                        or address_id != request.session.get("checkout_address")
+                    ):
+                        raise BusinessError(
+                            "Pilihan checkout berubah. Klik Lanjutkan untuk meninjau pesanan kembali."
+                        )
+                    prepared = Order.objects.filter(
+                        pk=saved, customer=customer, fulfillment=method, status="DRAFT"
+                    ).first()
+                    if not prepared:
+                        raise BusinessError(
+                            "Cara menerima pesanan berubah. Klik Lanjutkan untuk memperbarui ringkasan."
+                        )
+                    quote = None
+                    if method == "DELIVERY":
+                        try:
+                            quote_id = uuid.UUID(request.POST.get("quote") or "")
+                        except ValueError:
+                            raise BusinessError(
+                                "Pilih kurir dan jadwal pengiriman yang tersedia."
+                            ) from None
+                        quote = ShippingQuote.objects.filter(pk=quote_id, order=prepared).first()
+                        if not quote:
+                            raise BusinessError(
+                                "Pilihan pengiriman sudah berubah. Hitung kembali ongkir."
+                            )
+                    elif request.POST.get("quote"):
+                        raise BusinessError(
+                            "Pilihan kurir tidak berlaku untuk pengambilan di toko. Klik Lanjutkan."
+                        )
+                    order = services.checkout(
+                        request.user,
+                        prepared,
+                        form.cleaned_data["key"],
+                        quote,
+                        request.session.get("cart", {}),
+                        source_address=address if method == "DELIVERY" else None,
+                    )
+                    request.session["cart"] = {}
+                    request.session.pop("checkout_draft", None)
+                    request.session.pop("checkout_address", None)
+                    return redirect("order_detail", pk=order.pk)
                 draft = services.draft_order(
-                    request.user,
-                    request.session.get("cart", {}),
-                    form.cleaned_data["fulfillment"],
-                    form.cleaned_data["address"],
+                    request.user, request.session.get("cart", {}), method, address
                 )
-                request.session["checkout_draft"] = str(draft.pk)
-                if draft.fulfillment == "DELIVERY":
+                if method == "DELIVERY":
                     from delivery.services import quote_order
 
                     quotes, quote_messages = quote_order(draft)
+                request.session["checkout_draft"] = str(draft.pk)
+                request.session["checkout_address"] = address_id
             except BusinessError as exc:
+                draft = None
                 form.add_error(None, exc)
     try:
         lines = services.cart_lines(request.session.get("cart", {}))
@@ -136,7 +164,6 @@ def checkout_view(request):
             "draft": draft,
             "quotes": quotes,
             "quote_messages": quote_messages,
-            "confirm_key": str(uuid.uuid4()),
         },
     )
 
@@ -184,10 +211,26 @@ def order_detail(request, pk):
     items = list(OrderItem.objects.filter(order=order))
     for item in items:
         item.review = Review.objects.filter(order_item=item).first()
+    from billing.services import cancellation_options
+    from delivery.services import TERMINAL
+
+    cancellation = {}
+    if order.status in {"AWAITING_PAYMENT", "PAID", "PACKED", "NEEDS_ATTENTION"}:
+        cancellation = cancellation_options(
+            Invoice.objects.filter(order=order), active_role(request.user)
+        )
+        if (
+            Shipment.objects.filter(order=order)
+            .exclude(status__in=TERMINAL)
+            .exclude(method="INTERNAL", status__in={"READY", "ALLOCATED"})
+            .exists()
+        ):
+            cancellation = {"shipment_in_progress": True}
     return render(
         request,
         "orders/detail.html",
         {
+            **cancellation,
             "order": order,
             "items": items,
             "invoice": Invoice.objects.filter(order=order).first(),

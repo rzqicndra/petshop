@@ -1,0 +1,7 @@
+{% if paid_cancellation %}
+<section class="panel"><h2>Pembatalan setelah pembayaran</h2>
+{% if funds_returned %}<p>Pengembalian dana penuh sudah tercatat. Admin dapat menyelesaikan pembatalan.</p>
+{% elif can_operate %}<p>Periksa permintaan pelanggan dan pembayaran terkait. Pembatalan tersedia setelah pengembalian penuh tercatat dengan bukti transaksi.</p>
+{% else %}<p>Hubungi toko dengan nomor booking atau pesanan dan alasan pembatalan. Tim akan memeriksa pembayaran dan memberi kabar tentang pengembalian dana.</p><a class="text-link" href="{% url 'contact' %}">Hubungi toko</a>{% endif %}
+</section>
+{% elif shipment_in_progress %}<p class="notice info">Pengiriman sedang diproses. Hubungi toko jika pesanan perlu diubah.</p>{% endif %}

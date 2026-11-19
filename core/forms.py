@@ -64,6 +64,10 @@ class MedicalForm(forms.Form):
     aftercare = forms.CharField(
         label="Panduan perawatan pemilik", required=False, widget=forms.Textarea(attrs={"rows": 4})
     )
+    inpatient_recommended = forms.BooleanField(
+        label="Rekomendasikan rawat inap", required=False,
+        help_text="Pilih jika perlu berdasarkan pemeriksaan. Cantumkan instruksi atau tempat rujukan dalam panduan perawatan.",
+    )
     followup_at = forms.DateTimeField(
         label="Jadwal kontrol berikutnya",
         required=False,

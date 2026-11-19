@@ -40,7 +40,7 @@ Referensi: <https://developers.google.com/identity/openid-connect/openid-connect
 
 ## Maps dan jarak rute (tanpa billing Google)
 
-Leaflet/OpenStreetMap menampilkan peta tanpa key Google. Perhitungan rute menggunakan `ROUTES_MODE=openrouteservice`, key Standard gratis di `ORS_API_KEY`, dan `ORS_BASE_URL=https://api.heigit.org`. Key hanya dikirim dari backend. Cache dan pembatas permintaan menjaga penggunaan kuota.
+Leaflet/OpenStreetMap menampilkan peta tanpa key Google. Perhitungan rute menggunakan `ROUTES_MODE=openrouteservice`, key Standard gratis di `ORS_API_KEY`, dan `ORS_BASE_URL=https://api.heigit.org/openrouteservice`. Key hanya dikirim dari backend. Cache dan pembatas permintaan menjaga penggunaan kuota.
 
 Rute gagal atau kuota habis tidak diganti jarak garis lurus atau fixture. Kurir Toko hanya ditawarkan setelah jarak rute tervalidasi, kapasitas dan ukuran paket sesuai. Google Login tetap terpisah. Panduan instalasi, batas layanan gratis dan UAT: [PETA_GRATIS.md](PETA_GRATIS.md).
 

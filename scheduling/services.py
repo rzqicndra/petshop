@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import timedelta
 from math import ceil
 from django.db import IntegrityError
@@ -11,14 +10,20 @@ from customers.models import Customer, Pet
 from .models import (
     ServicePackage,
     PackageSpecies,
-    PackageResource,
-    Resource,
-    StaffShift,
     Booking,
     ResourceReservation,
 )
 
-BLOCKING = {"HELD", "CONFIRMED", "IN_USE", "BLOCKED"}
+from .availability import (
+    AppointmentCapacity,
+    BLOCKING,
+    BOOK_AHEAD_DAYS,
+    MAX_MINUTES,
+    STEP,
+    opening_interval,
+    store_calendar,
+)
+
 BOOKING_ACTIVE = {"AWAITING_PAYMENT", "CONFIRMED", "IN_SERVICE", "READY_PICKUP"}
 
 
@@ -26,37 +31,32 @@ def customer_for(user):
     return Customer.objects.get(user=user, is_active=True)
 
 
-def validate_time(start, end, kind):
-    if (
-        not timezone.is_aware(start)
-        or not timezone.is_aware(end)
-        or start <= timezone.now()
-        or start >= end
-    ):
+def validate_time(start, end, kind, *, online=False):
+    now = timezone.now()
+    if not timezone.is_aware(start) or not timezone.is_aware(end) or start <= now or start >= end:
         raise BusinessError("Pilih jadwal mendatang dengan waktu selesai setelah waktu mulai.")
     if end - start > timedelta(days=60):
-        raise BusinessError("Durasi maksimal satu Booking adalah 60 hari.")
-    from core.models import StoreSettings
-
-    store = StoreSettings.objects.filter(pk=1).first()
-    hours = store.opening_hours.get(str(timezone.localtime(start).weekday())) if store else None
+        raise BusinessError("Durasi maksimal satu booking adalah 60 hari.")
+    store, zone = store_calendar()
+    day = start.astimezone(zone).date()
+    hours = opening_interval(store, day, zone)
     if not hours:
         raise BusinessError("Toko tutup pada hari tersebut.")
-    local = timezone.localtime(start)
-    lo, hi = hours
-    if not (lo <= local.strftime("%H:%M") < hi):
+    if not hours[0] <= start < hours[1]:
         raise BusinessError("Waktu mulai berada di luar jam operasional.")
-    if kind != "BOARDING" and (
-        timezone.localdate(end) != timezone.localdate(start)
-        or timezone.localtime(end).strftime("%H:%M") > hi
-    ):
-        raise BusinessError("Layanan harus selesai dalam jam operasional.")
     if kind == "BOARDING":
-        end_store_hours = store.opening_hours.get(str(timezone.localtime(end).weekday()))
-        if not end_store_hours or not (
-            end_store_hours[0] <= timezone.localtime(end).strftime("%H:%M") < end_store_hours[1]
-        ):
+        pickup = opening_interval(store, end.astimezone(zone).date(), zone)
+        if not pickup or not pickup[0] <= end < pickup[1]:
             raise BusinessError("Waktu jemput harus berada dalam jam operasional.")
+        return
+    if end > hours[1]:
+        raise BusinessError("Layanan harus selesai dalam jam operasional.")
+    if kind not in MAX_MINUTES or end - start > timedelta(minutes=MAX_MINUTES[kind]):
+        raise BusinessError("Durasi paket melebihi batas sesi. Pilih paket lain atau hubungi toko.")
+    if online and day > now.astimezone(zone).date() + timedelta(days=BOOK_AHEAD_DAYS):
+        raise BusinessError("Grooming dan konsultasi bisa dipesan sampai tujuh hari ke depan.")
+    if online and (start - hours[0]) % STEP != timedelta(0):
+        raise BusinessError("Pilih salah satu jam yang tersedia pada jadwal.")
 
 
 def expire_capacity_holds():
@@ -75,63 +75,31 @@ def expire_capacity_holds():
 
 
 def allocate(package, booking, expires_at):
-    pools = defaultdict(list)
-    for entry in (
-        PackageResource.objects.select_related("resource__staff_user")
-        .filter(package=package, resource__is_active=True)
-        .order_by("resource_id")
-    ):
-        pools[entry.pool].append(entry.resource)
-    if not pools or "STAFF" not in pools:
-        raise BusinessError("Sumber daya layanan belum dikonfigurasi. Hubungi CS.")
     period = Range(
         booking.starts_at, booking.ends_at + timedelta(minutes=package.buffer_minutes), "[)"
     )
-    selected = []
-    for pool, resources in sorted(pools.items()):
-        chosen = None
-        for candidate in resources:
-            resource = Resource.objects.select_for_update().get(pk=candidate.pk)
-            if resource.kind == "STAFF":
-                expected_role = "DOCTOR" if booking.kind_snapshot == "VET" else "GROOMER"
-                if (
-                    not resource.staff_user
-                    or not resource.staff_user.is_active
-                    or not resource.staff_user.groups.filter(name=expected_role).exists()
-                ):
-                    continue
-                if not StaffShift.objects.filter(
-                    resource=resource,
-                    is_available=True,
-                    starts_at__lte=period.lower,
-                    ends_at__gte=period.upper,
-                ).exists():
-                    continue
-                if StaffShift.objects.filter(
-                    resource=resource,
-                    is_available=False,
-                    starts_at__lt=period.upper,
-                    ends_at__gt=period.lower,
-                ).exists():
-                    continue
-            if ResourceReservation.objects.filter(
-                resource=resource, status__in=BLOCKING, period__overlap=period
-            ).exists():
-                continue
-            chosen = resource
-            break
-        if not chosen:
-            raise BusinessError("Jadwal penuh atau staf tidak bertugas. Pilih waktu lain.")
+    capacity = AppointmentCapacity(
+        package,
+        booking.pet,
+        period.lower,
+        period.upper,
+        now=timezone.now(),
+        exclude=booking.pk,
+        lock=True,
+    )
+    selected = capacity.select(booking.starts_at, booking.ends_at)
+    if not selected:
+        raise BusinessError("Jadwal penuh atau staf tidak bertugas. Pilih waktu lain.")
+    for pool, resource in selected.items():
         ResourceReservation.objects.create(
-            resource=chosen,
+            resource=resource,
             booking=booking,
             period=period,
             kind=pool,
             status="HELD",
             expires_at=expires_at,
         )
-        selected.append(chosen)
-    return selected
+    return list(selected.values())
 
 
 def create_booking(
@@ -154,11 +122,13 @@ def create_booking(
     if pet.customer_id != customer.pk or not pet.is_active:
         raise BusinessError("Hewan tidak tersedia pada profil pelanggan ini.")
 
-    package = ServicePackage.objects.select_related("service").get(
-        pk=package.pk,
-        is_active=True,
-        service__is_active=True,
+    package = (
+        ServicePackage.objects.select_related("service")
+        .filter(pk=package.pk, is_active=True, service__is_active=True)
+        .first()
     )
+    if not package:
+        raise BusinessError("Paket layanan sudah berubah. Pilih kembali layanan yang tersedia.")
 
     if not PackageSpecies.objects.filter(
         package=package,
@@ -175,16 +145,12 @@ def create_booking(
             raise BusinessError("Penitipan minimal 12 jam. Tentukan waktu jemput.")
 
         if not emergency or not emergency.get("phone") or not emergency.get("consent"):
-            raise BusinessError(
-                "Kontak darurat dan persetujuan kontak diperlukan untuk penitipan."
-            )
+            raise BusinessError("Kontak darurat dan persetujuan kontak diperlukan untuk penitipan.")
     else:
         if not package.duration_minutes or not package.price_rp or package.price_rp < 0:
             raise BusinessError("Paket layanan belum lengkap.")
 
         ends_at = starts_at + timedelta(minutes=package.duration_minutes)
-
-    validate_time(starts_at, ends_at, kind)
 
     try:
         with commerce_transaction():
@@ -205,6 +171,7 @@ def create_booking(
             if not created and record.result_reference:
                 return Booking.objects.get(pk=record.result_reference["id"])
 
+            validate_time(starts_at, ends_at, kind, online=active_role(actor) == "CUSTOMER")
             expire_capacity_holds()
 
             # Baca ulang dan kunci data hewan sebelum membuat booking.
@@ -212,8 +179,7 @@ def create_booking(
 
             if not pet.is_active or pet.customer_id != customer.pk:
                 raise BusinessError(
-                    "Hewan sudah dihapus atau profilnya berubah. "
-                    "Pilih profil yang masih aktif."
+                    "Hewan sudah dihapus atau profilnya berubah. " "Pilih profil yang masih aktif."
                 )
 
             if not PackageSpecies.objects.filter(
@@ -359,7 +325,9 @@ def reschedule_booking(actor, booking, starts_at, expected_version):
                     "Jadwal tidak dapat diubah pada tahap ini. Muat ulang detail Booking."
                 )
             ends_at = starts_at + timedelta(minutes=booking.package.duration_minutes)
-            validate_time(starts_at, ends_at, booking.kind_snapshot)
+            validate_time(
+                starts_at, ends_at, booking.kind_snapshot, online=active_role(actor) == "CUSTOMER"
+            )
             expire_capacity_holds()
             ResourceReservation.objects.filter(booking=booking, status__in=BLOCKING).update(
                 status="RELEASED"

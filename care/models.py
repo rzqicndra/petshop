@@ -29,6 +29,7 @@ class MedicalRecordVersion(TimestampedModel):
     diagnosis = models.TextField(default="", blank=True)
     treatment = models.TextField(default="", blank=True)
     aftercare = models.TextField(default="", blank=True)
+    inpatient_recommended = models.BooleanField(default=False)
     followup_at = models.DateTimeField(null=True, blank=True)
     published_at = models.DateTimeField(null=True, blank=True)
     is_current = models.BooleanField(default=False)

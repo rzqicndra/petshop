@@ -1,0 +1,19 @@
+{% if slot_days %}
+<nav class="slot-days" aria-label="Tanggal yang tersedia">
+  {% for day in slot_days %}
+    <a href="?{% if pet and package %}pet={{ pet.pk }}&amp;paket={{ package.pk }}&amp;{% endif %}hari={{ day.value }}#pilih-jam" {% if day.value == selected_day %}aria-current="date"{% endif %}>
+      <span>{{ day.date|date:"D" }}</span><strong>{{ day.date|date:"d M" }}</strong>
+    </a>
+  {% endfor %}
+</nav>
+<fieldset class="slot-fieldset" id="pilih-jam"><legend>Pilih jam kunjungan</legend>
+  {% regroup slots by part as periods %}
+  {% for period in periods %}<details class="slot-period" {% if forloop.first %}open{% endif %}><summary>{{ period.grouper }} <small>{{ period.list|length }} pilihan jam</small></summary>
+  <div class="time-slots">{% for slot in period.list %}
+    <label><input type="radio" name="starts_at" value="{{ slot.value }}" required><span>{{ slot.label }}</span></label>
+  {% endfor %}</div></details>{% endfor %}
+</fieldset>
+<small class="muted">Waktu toko · {{ zone_name }}. Slot disimpan setelah booking dibuat.</small>
+{% else %}
+<p class="notice info">Belum ada slot tersedia untuk paket dan hewan ini dalam tujuh hari ke depan. Pilih paket lain atau periksa jadwal petugas.</p>
+{% endif %}

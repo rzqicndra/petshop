@@ -42,7 +42,7 @@
 <button class="button" type="submit">Catat serah terima {% icon 'arrow' %}</button>
 </form>{% elif order.status == 'PACKED' and order.fulfillment == 'DELIVERY' %}<p class="small muted">Pemesanan kurir hanya dilakukan untuk barang yang sudah siap. Pengiriman berstatus belum pasti wajib direkonsiliasi.</p>
 <form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="ship">Proses pengiriman {% icon 'arrow' %}</button>
-</form>{% else %}<p class="muted small">Tindakan tersedia sesuai tahap pesanan.</p>{% endif %}</section>{% endif %}{% if order.status == 'AWAITING_PAYMENT' or can_operate and order.status == 'PAID' or can_operate and order.status == 'PACKED' or can_operate and order.status == 'NEEDS_ATTENTION' %}<section class="panel">
+</form>{% else %}<p class="muted small">Tindakan tersedia sesuai tahap pesanan.</p>{% endif %}</section>{% endif %}{% include 'billing/cancellation_help.html' %}{% if can_cancel %}<section class="panel">
 <details>
 <summary>Batalkan pesanan</summary>
 <form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="cancel">

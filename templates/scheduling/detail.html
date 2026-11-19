@@ -16,7 +16,7 @@
 </div>
 <div><dt>Jadwal mulai</dt><dd>{{ booking.starts_at|date:'l, d F Y, H:i' }}</dd>
 </div>
-<div><dt>Selesai / jemput</dt><dd>{{ booking.ends_at|date:'l, d F Y, H:i' }}</dd>
+<div><dt>{% if stay %}Waktu jemput{% else %}Selesai{% endif %}</dt><dd>{{ booking.ends_at|date:'l, d F Y, H:i' }}</dd>
 </div>{% if stay %}<div><dt>Unit penitipan</dt><dd>{{ stay.unit.resource.name|default:'Menunggu alokasi' }}</dd>
 </div>
 <div><dt>Petugas</dt><dd>{{ stay.caretaker.full_name|default:'Menunggu penugasan' }}</dd>
@@ -50,7 +50,7 @@
 <p>{{ record.treatment }}</p>
 </div>
 <div class="clinical-block">
-<h4>Panduan perawatan di rumah</h4>
+<h4>Panduan perawatan</h4>{% if record.inpatient_recommended %}<p><strong>Dokter merekomendasikan rawat inap.</strong> Hubungi tim perawatan untuk mengatur tindak lanjut.</p>{% endif %}
 <p>{{ record.aftercare }}</p>
 </div>{% if record.followup_at %}<div class="notice info"><strong>Jadwal kontrol</strong>
 <p>{{ record.followup_at|date:'l, d F Y, H:i' }}. Pengingat dikirim mengikuti jadwal yang diterbitkan dokter.</p>
@@ -203,14 +203,14 @@
 </form>{% else %}<p class="muted small">Aksi mengikuti status Booking.</p>{% endif %}</section>{% endif %}
 {% if not staff_workspace and booking.status == 'CONFIRMED' and not stay %}<section class="panel">
 <h2>Ubah jadwal</h2>
-<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="reschedule">{% include 'includes_form.html' with form=reschedule_form %}<button class="button secondary" type="submit">Periksa & ubah jadwal</button>
+<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="reschedule">{{ reschedule_form.version }}{% include 'scheduling/slots.html' %}{% if slots %}<button class="button secondary" type="submit">Simpan jadwal baru</button>{% endif %}
 </form>
 </section>{% endif %}
 {% if not staff_workspace and booking.status == 'COMPLETED' %}<section class="panel">
 <h2>Ceritakan pengalaman Anda.</h2>
 <p class="muted small">Ulasan hanya tersedia untuk layanan yang selesai dan dibayar.</p><a class="button secondary full" href="{% url 'review' 'booking' booking.pk %}">{% if review %}Edit ulasan{% else %}Tulis ulasan{% endif %} ☆</a>
 </section>{% endif %}
-{% if booking.status == 'SUBMITTED' or booking.status == 'AWAITING_PAYMENT' or can_operate and booking.status == 'CONFIRMED' or can_operate and booking.status == 'NEEDS_ATTENTION' %}{% if not staff_workspace or can_operate %}<section class="panel">
+{% include 'billing/cancellation_help.html' %}{% if can_cancel %}<section class="panel">
 <details>
 <summary>Batalkan Booking</summary>
 <form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="cancel">
@@ -220,7 +220,7 @@
 <button class="button danger" type="submit">Batalkan Booking</button>
 </form>
 </details>
-</section>{% endif %}{% endif %}</div>
+</section>{% endif %}</div>
 </div>
 {% endblock %}
 

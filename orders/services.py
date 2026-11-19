@@ -34,6 +34,21 @@ def cart_lines(cart):
     return lines
 
 
+def shipping_address_data(address):
+    return {
+        "recipient_name": address.recipient_name,
+        "recipient_phone": address.recipient_phone,
+        "full_address": address.address_line,
+        "latitude": address.latitude,
+        "longitude": address.longitude,
+        "delivery_note": address.delivery_note,
+        "region": {
+            name: getattr(address, name)
+            for name in ("province", "city", "district", "village", "postal_code")
+        },
+    }
+
+
 def draft_order(actor, cart, fulfillment, address=None, customer=None):
     require_role(actor, OPS | {"CUSTOMER"})
     customer = customer or Customer.objects.get(user=actor, is_active=True)
@@ -87,26 +102,11 @@ def draft_order(actor, cart, fulfillment, address=None, customer=None):
                 },
             )
         if fulfillment == "DELIVERY":
-            OrderAddressSnapshot.objects.create(
-                order=order,
-                recipient_name=address.recipient_name,
-                recipient_phone=address.recipient_phone,
-                full_address=address.address_line,
-                latitude=address.latitude,
-                longitude=address.longitude,
-                delivery_note=address.delivery_note,
-                region={
-                    "province": address.province,
-                    "city": address.city,
-                    "district": address.district,
-                    "village": address.village,
-                    "postal_code": address.postal_code,
-                },
-            )
+            OrderAddressSnapshot.objects.create(order=order, **shipping_address_data(address))
         return order
 
 
-def checkout(actor, draft, key, quote=None, cart=None):
+def checkout(actor, draft, key, quote=None, cart=None, *, source_address=None):
     require_role(actor, OPS | {"CUSTOMER"})
     with commerce_transaction():
         from billing.services import expire_unpaid
@@ -122,6 +122,20 @@ def checkout(actor, draft, key, quote=None, cart=None):
             raise BusinessError("Pesanan tidak tersedia.")
         if order.status != "DRAFT":
             raise BusinessError("Pesanan sudah diproses. Buka detail pesanan.")
+        if source_address is not None and order.fulfillment == "DELIVERY":
+            current = (
+                Address.objects.select_for_update()
+                .filter(pk=source_address.pk, customer=order.customer, is_active=True)
+                .first()
+            )
+            saved = OrderAddressSnapshot.objects.get(order=order)
+            if not current or any(
+                getattr(saved, field) != value
+                for field, value in shipping_address_data(current).items()
+            ):
+                raise BusinessError(
+                    "Alamat pengiriman berubah. Hitung kembali ongkir untuk alamat terbaru."
+                )
         if cart is not None and order.cart_fingerprint != fingerprint(cart):
             raise BusinessError(
                 "Keranjang berubah. Periksa kembali ringkasan dan ongkir sebelum Checkout."

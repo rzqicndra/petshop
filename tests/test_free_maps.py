@@ -19,7 +19,7 @@ class FreeRoutingTests(TestCase):
         post.return_value.json.return_value = {"routes": [{"summary": {"distance": 5000.1}}]}
         self.assertEqual(route_distance((-6.2, 106.8), (-6.3, 106.9), "DRIVE"), 5001)
         self.assertEqual(
-            post.call_args.args[0], "https://api.heigit.org/v2/directions/driving-car/json"
+            post.call_args.args[0], "https://api.heigit.org/openrouteservice/v2/directions/driving-car/json"
         )
         payload = post.call_args.kwargs
         self.assertEqual(payload["json"]["coordinates"], [[106.8, -6.2], [106.9, -6.3]])

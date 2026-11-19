@@ -11,10 +11,9 @@
 <div class="checkout-steps"><span>Selesai · Keranjang</span><span class="current">2. Pengiriman</span><span>3. Pembayaran</span>
 </div>
 <div class="detail-grid">
-<div>
-<section class="panel">
-<h2>Cara menerima pesanan</h2>
-<form method="post" class="stack-form" id="checkout-method">{% csrf_token %}<input type="hidden" name="action" value="prepare">{{ form.key }}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}<div class="receive-options">
+<form method="post" id="checkout-method">{% csrf_token %}
+<section class="panel stack-form"><h2>Cara menerima pesanan</h2>
+{{ form.key }}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}<div class="receive-options">
 <label>
 <input type="radio" name="fulfillment" value="PICKUP" {% if form.fulfillment.value != 'DELIVERY' %}checked{% endif %}>{% icon 'store' %}<span><strong>Ambil di toko</strong><small>Tanpa biaya pengiriman</small></span>
 </label>
@@ -27,26 +26,24 @@
 <h3>Alamat penerima</h3><a class="text-link small" href="{% url 'addresses' %}?baru=1">{% icon 'plus' %} Tambah</a>
 </div>{% for address in form.address.field.queryset %}<label class="checkout-address">
 <input type="radio" name="address" value="{{ address.pk }}" {% if form.address.value|stringformat:'s' == address.pk|stringformat:'s' or not form.address.value and address.is_default %}checked{% endif %}><span><strong>{{ address.recipient_name }} · {{ address.label }}</strong><small>{{ address.recipient_phone }}</small><small>{{ address.address_line }}, {{ address.city }} {{ address.postal_code }}</small></span>{% if address.is_default %}<span class="badge green">Utama</span>{% endif %}</label>{% empty %}<p class="notice info">Tambahkan alamat lengkap dan titik pengantaran terlebih dahulu.</p>{% endfor %}{{ form.address.errors }}</div>
-<button class="button secondary" type="submit">Lanjutkan {% icon 'arrow' %}</button>
-</form>
-</section>{% if draft %}<section class="panel">
-<h2>{% if draft.fulfillment == 'DELIVERY' %}Pilih pengiriman{% else %}Konfirmasi pengambilan{% endif %}</h2>{% for note in quote_messages %}<div class="notice info">{{ note }}</div>{% endfor %}<form method="post" class="stack-form">{% csrf_token %}<input type="hidden" name="action" value="confirm">
-<input type="hidden" name="key" value="{{ confirm_key }}">{% if draft.fulfillment == 'DELIVERY' %}{% for quote in quotes %}<label class="quote-option">
-<input type="radio" name="quote" value="{{ quote.pk }}" required><span><strong>{{ quote.package_snapshot.label }}</strong><small>{% if quote.window %}{{ quote.window.starts_at|date:'d M, H:i' }}–{{ quote.window.ends_at|date:'H:i' }}{% else %}Instan · sesuai ketersediaan kurir{% endif %}</small></span><strong>{{ quote.fee_rp|rupiah }}</strong>
-</label>{% empty %}<p class="notice">Pengiriman belum tersedia untuk alamat ini. Coba alamat lain atau ambil di toko.</p>{% endfor %}{% else %}<div class="pickup-note">{% icon 'store' %}<div><strong>Ambil di Sinau Satwa</strong>
+<button class="button secondary" type="submit" name="action" value="prepare" formnovalidate>Lanjutkan {% icon 'arrow' %}</button>
+</section>{% if draft %}<fieldset id="checkout-review" aria-labelledby="review-heading" class="panel stack-form" data-method="{{ draft.fulfillment }}" data-address="{{ request.session.checkout_address }}">
+<h2 id="review-heading">{% if draft.fulfillment == 'DELIVERY' %}Pilih pengiriman{% else %}Konfirmasi pengambilan{% endif %}</h2>{% for note in quote_messages %}<div class="notice info">{{ note }}</div>{% endfor %}<input type="hidden" name="draft" value="{{ draft.pk }}">{% if draft.fulfillment == 'DELIVERY' %}{% for quote in quotes %}<label class="quote-option">
+<input type="radio" name="quote" value="{{ quote.pk }}" data-fee="{{ quote.fee_rp|stringformat:'d' }}" required><span><strong>{{ quote.package_snapshot.label }}</strong><small>{% if quote.window %}{{ quote.window.starts_at|date:'d M, H:i' }}–{{ quote.window.ends_at|date:'H:i' }}{% else %}Instan · sesuai ketersediaan kurir{% endif %}</small></span><strong>{{ quote.fee_rp|rupiah }}</strong>
+</label>{% empty %}<p class="notice">Pengiriman belum tersedia untuk alamat ini. Coba alamat lain atau ambil di toko.</p>{% endfor %}{% else %}<div class="pickup-note">{% icon 'store' %}<div><strong>Ambil di {{ store_settings.business_name|default:"toko" }}</strong>
 <p>Tunggu status siap diambil. Tunjukkan nomor pesanan saat tiba di toko.</p>
 </div>
-</div>{% endif %}{% if draft.fulfillment == 'PICKUP' or quotes %}<button class="button full" type="submit">Buat pesanan {% icon 'arrow' %}</button>{% endif %}</form>
+</div>{% endif %}{% if draft.fulfillment == 'PICKUP' or quotes %}<button class="button full centered-action" type="submit" name="action" value="confirm">Buat pesanan {% icon 'arrow' %}</button>{% endif %}
 <p class="small muted">Selesaikan pembayaran dalam 15 menit setelah pesanan dibuat.</p>
-</section>{% endif %}</div>
-<section class="panel order-summary">
+</fieldset>{% endif %}</form>
+<section class="panel order-summary" data-subtotal="{{ total|stringformat:'d' }}">
 <h2>Ringkasan pesanan</h2>{% for line in lines %}<div class="list-row">
 <div><strong>{{ line.variant.product.name }}</strong>
 <p>{{ line.variant.label }} · {{ line.quantity }} item</p>
 </div><span>{{ line.total|rupiah }}</span>
 </div>{% endfor %}<div class="price-total"><span>Subtotal produk</span><strong>{{ total|rupiah }}</strong>
 </div>
-<p class="payment-assurance">{% icon 'lock' %} Total akhir termasuk ongkir ditampilkan sebelum pembayaran.</p>
+<div class="checkout-totals" aria-live="polite"><div><span>Ongkir</span><strong data-shipping-total>{% if form.fulfillment.value == 'DELIVERY' %}Pilih kurir{% else %}Rp0{% endif %}</strong></div><div><span>Total pesanan</span><strong data-order-total>{% if form.fulfillment.value == 'DELIVERY' %}—{% else %}{{ total|rupiah }}{% endif %}</strong></div></div><p class="payment-assurance">{% icon 'lock' %} Total akhir termasuk ongkir ditampilkan sebelum pembayaran.</p>
 </section>
 </div>
 {% endblock %}

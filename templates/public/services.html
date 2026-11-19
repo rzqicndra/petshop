@@ -3,6 +3,7 @@
 {% block content %}
 <section class="public-section">
 {% if site_content.service_page %}<div class="editorial-heading"><p class="eyebrow">{{ site_content.service_page.overline }}</p><h1>{{ site_content.service_page.heading|linebreaksbr }}</h1><p>{{ site_content.service_page.body|linebreaksbr }}</p></div>{% endif %}
+<p><a class="text-link" href="{% url 'timetable' %}">{% icon 'calendar' %} Lihat jam buka dan jadwal petugas</a></p>
 <div class="service-grid">{% for package in packages %}<article class="service-card">{% service_image package.service as image %}<img src="{{ image }}" alt="{{ package.service.name }}" loading="lazy">
 <div>
 <p class="eyebrow">{{ package.service.get_kind_display }}</p>

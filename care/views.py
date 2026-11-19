@@ -36,7 +36,7 @@ def medical_pdf(request, pk):
         Paragraph("Sinau Satwa", styles["Title"]),
         Paragraph("Ringkasan pemeriksaan dan panduan perawatan", styles["Heading2"]),
     ]
-    for label, value in [
+    sections = [
         ("Booking", booking.code),
         ("Hewan", booking.pet.name),
         ("Dokter", record.author.full_name),
@@ -49,7 +49,10 @@ def medical_pdf(request, pk):
         ("Panduan perawatan", record.aftercare),
         ("Kontrol berikutnya", str(record.followup_at or "Sesuai arahan dokter")),
         ("Alasan revisi", record.revision_reason or "Versi awal"),
-    ]:
+    ]
+    if record.inpatient_recommended:
+        sections.append(("Anjuran dokter", "Rawat inap"))
+    for label, value in sections:
         content.extend(
             [
                 Spacer(1, 0.25 * cm),

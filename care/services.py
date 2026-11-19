@@ -90,6 +90,8 @@ def save_medical(actor, visit, data, publish=False, file=None):
                 version_no=(latest.version_no + 1 if latest else 1),
                 **{k: v or (None if k == "followup_at" else "") for k, v in allowed.items()},
             )
+        if "inpatient_recommended" in data:
+            record.inpatient_recommended = data["inpatient_recommended"] is True
         if publish:
             if record.followup_at and record.followup_at <= timezone.now():
                 raise BusinessError("Jadwal kontrol harus berada di masa mendatang.")

@@ -1,6 +1,7 @@
 """Openrouteservice routing via HeiGIT: server key, shared quota guard and short cache."""
 
 from datetime import timedelta
+from urllib.parse import urlsplit
 import hashlib
 import json
 import math
@@ -10,6 +11,14 @@ from django.utils import timezone
 from accounts.services import rate_limit
 from core.services import BusinessError
 from .models import RouteEstimate
+
+
+def directions_base_url():
+    base = settings.ORS_BASE_URL.rstrip("/")
+    url = urlsplit(base)
+    if url.hostname == "api.heigit.org" and not url.path:
+        return base + "/openrouteservice"
+    return base
 
 
 def ors_route_distance(origin, destination, travel_mode):
@@ -30,8 +39,9 @@ def ors_route_distance(origin, destination, travel_mode):
             raise ValueError
     except (TypeError, ValueError, IndexError):
         raise BusinessError("Koordinat rute tidak valid.") from None
+    base = directions_base_url()
     cache_key = hashlib.sha256(
-        json.dumps([settings.ORS_BASE_URL, profile, points], separators=(",", ":")).encode()
+        json.dumps([base, profile, points], separators=(",", ":")).encode()
     ).hexdigest()
     now = timezone.now()
     cached = RouteEstimate.objects.filter(cache_key=cache_key, expires_at__gt=now).first()
@@ -43,7 +53,7 @@ def ors_route_distance(origin, destination, travel_mode):
     rate_limit("ors-day", identity, settings.ORS_REQUESTS_PER_DAY, 86400)
     try:
         response = requests.post(
-            settings.ORS_BASE_URL + f"/v2/directions/{profile}/json",
+            base + f"/v2/directions/{profile}/json",
             headers={"Authorization": settings.ORS_API_KEY, "Accept": "application/json"},
             json={
                 "coordinates": points,

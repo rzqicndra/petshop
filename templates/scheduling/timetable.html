@@ -1,0 +1,17 @@
+{% extends 'base.html' %}{% load sinau %}
+{% block title %}Jadwal toko & petugas · {{ store_settings.business_name|default:"Sinau Satwa" }}{% endblock %}
+{% block content %}
+<div class="schedule-page">
+<header class="page-heading"><div><h1>Jadwal toko & petugas</h1><p>Jam buka dan petugas yang dijadwalkan untuk hari ini hingga tujuh hari ke depan. Waktu toko · {{ zone_name }}.</p></div><a href="{% url 'new_booking' %}" class="button">Booking layanan {% icon 'arrow' %}</a></header>
+{% if hours_published %}
+<div class="schedule-list">{% for row in days %}
+  <section class="schedule-row">
+    <div class="schedule-date"><span>{{ row.day|date:"l" }}</span><strong>{{ row.day|date:"j M" }}</strong></div>
+    <div class="schedule-hours">{% if row.hours %}<span class="badge green">Buka</span><strong>{{ row.hours }}</strong>{% else %}<span class="badge">Tutup</span>{% endif %}</div>
+    <div>{% if row.hours %}{% for member in row.staff %}<div class="staff-shift"><span><strong>{{ member.name }}</strong><small>{{ member.role }}</small></span><span>{{ member.times }}</span></div>{% empty %}<span class="muted small">Jadwal petugas belum tersedia.</span>{% endfor %}{% endif %}</div>
+  </section>
+{% endfor %}</div>
+<p class="muted small">Jam praktik menunjukkan waktu petugas bertugas. Pilih layanan dan hewan saat booking untuk melihat slot yang masih kosong.</p>
+{% else %}<p class="notice info">Jam operasional belum dipublikasikan. <a href="{% url 'contact' %}">Hubungi toko</a> untuk informasi jadwal.</p>{% endif %}
+</div>
+{% endblock %}

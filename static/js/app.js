@@ -173,16 +173,38 @@ document.querySelectorAll("input[type=file]").forEach((input) => {
   });
 });
 const checkoutMethod = document.getElementById("checkout-method");
-function toggleCheckoutAddress() {
-  if (!checkoutMethod) return;
-  const delivery =
-    checkoutMethod.querySelector("[name=fulfillment]:checked")?.value ===
-    "DELIVERY";
+if (checkoutMethod) {
   const addresses = document.getElementById("checkout-addresses");
-  if (addresses) addresses.hidden = !delivery;
+  const review = document.getElementById("checkout-review");
+  const summary = document.querySelector("[data-subtotal]");
+  const currency = new Intl.NumberFormat("id-ID");
+  function syncCheckout() {
+    const method = checkoutMethod.querySelector("[name=fulfillment]:checked")?.value;
+    const delivery = method === "DELIVERY";
+    addresses.hidden = !delivery;
+    addresses.querySelectorAll("input").forEach(input => { input.disabled = !delivery; });
+    const address = delivery ? checkoutMethod.querySelector("[name=address]:checked")?.value || "" : "";
+    if (review && (method !== review.dataset.method || address !== review.dataset.address)) {
+      review.hidden = true;
+      review.disabled = true;
+      review.querySelectorAll("[name=quote]").forEach(input => { input.checked = false; });
+    }
+    const quote = review && !review.disabled && review.querySelector("[name=quote]:checked");
+    const fee = delivery ? (quote ? Number(quote.dataset.fee) : null) : 0;
+    summary.querySelector("[data-shipping-total]").textContent = fee === null ? "Pilih kurir" : "Rp" + currency.format(fee);
+    summary.querySelector("[data-order-total]").textContent = fee === null ? "—" : "Rp" + currency.format(Number(summary.dataset.subtotal) + fee);
+  }
+  checkoutMethod.addEventListener("change", syncCheckout);
+  window.addEventListener("pageshow", syncCheckout);
+  syncCheckout();
 }
-checkoutMethod?.addEventListener("change", toggleCheckoutAddress);
-toggleCheckoutAddress();
+const bookingFilters = document.querySelector("[data-booking-filters]");
+if (bookingFilters) {
+  bookingFilters.addEventListener("change", (event) => {
+    if (event.target.name === "pet") bookingFilters.elements.paket.value = "";
+    bookingFilters.requestSubmit();
+  });
+}
 // A shared confirmation dialog. Server-side authorization remains authoritative.
 const confirmation = document.getElementById("confirmation-dialog");
 let pendingConfirmation = null;

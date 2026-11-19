@@ -1,6 +1,9 @@
 from datetime import timedelta
 from math import ceil
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db.models import Count, F, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from accounts.permissions import require_role, active_role, OPS
 from core.models import StoreSettings
@@ -89,7 +92,10 @@ def origin_snapshot(store):
 def quote_order(order):
     if order.status != "DRAFT" or order.fulfillment != "DELIVERY":
         raise BusinessError("Pesanan belum siap untuk menghitung ongkir.")
-    policy, store = DeliveryPolicy.objects.get(pk=1), StoreSettings.objects.get(pk=1)
+    policy = DeliveryPolicy.objects.filter(pk=1).first()
+    store = StoreSettings.objects.filter(pk=1).first()
+    if not policy or not store:
+        raise BusinessError("Pengiriman belum dikonfigurasi. Pilih ambil di toko atau hubungi toko.")
     address = OrderAddressSnapshot.objects.get(order=order)
     if store.latitude is None or store.longitude is None:
         raise BusinessError("Lokasi asal toko belum dikonfigurasi.")
@@ -97,15 +103,27 @@ def quote_order(order):
         raise BusinessError("Data alamat dan kontak resmi toko belum disahkan.")
     if not settings.LOCAL_MODE or settings.SHIPPING_MODE == "biteship":
         from core.store_validation import validate_official_store
-        validate_official_store(store)
+        try:
+            validate_official_store(store)
+        except ValidationError:
+            raise BusinessError("Pengiriman belum tersedia karena data asal toko belum lengkap. Hubungi toko atau pilih pengambilan.") from None
     package = package_snapshot(order, policy)
     store_snapshot = origin_snapshot(store)
     origin, destination = (store.latitude, store.longitude), (address.latitude, address.longitude)
     messages, quotes, distance = [], [], None
-    try:
-        distance = providers.route_distance(origin, destination, policy.travel_mode)
-    except Exception:
-        messages.append("Jarak rute tidak dapat diperiksa. Kurir Toko tidak ditawarkan.")
+    within_limits = (
+        package["weight"] <= policy.max_weight_g
+        and package["length"] <= policy.max_length_cm
+        and package["width"] <= policy.max_width_cm
+        and package["height"] <= policy.max_height_cm
+    )
+    if policy.internal_enabled and within_limits:
+        try:
+            distance = providers.route_distance(origin, destination, policy.travel_mode)
+        except (BusinessError, OSError):
+            messages.append("Rute jalan ke alamat ini belum dapat dihitung. Periksa pin alamat atau klik Lanjutkan untuk mencoba lagi.")
+    elif policy.internal_enabled:
+        messages.append("Ukuran atau berat paket melebihi kapasitas Kurir Toko.")
     expiry = timezone.now() + timedelta(minutes=10)
     common = {
         "order": order,
@@ -117,33 +135,21 @@ def quote_order(order):
         "origin_snapshot": store_snapshot,
         "expires_at": expiry,
     }
-    within_limits = (
-        package["weight"] <= policy.max_weight_g
-        and package["length"] <= policy.max_length_cm
-        and package["width"] <= policy.max_width_cm
-        and package["height"] <= policy.max_height_cm
-    )
     if (
         policy.internal_enabled
         and distance is not None
         and distance <= policy.max_route_m
         and within_limits
     ):
-        for window in DeliveryWindow.objects.filter(
-            is_active=True, starts_at__gt=timezone.now()
-        ).order_by("starts_at")[:20]:
+        now = timezone.now()
+        reserved = (DeliveryReservation.objects.filter(window_id=OuterRef("pk"), status__in={"HELD", "CONFIRMED", "FULFILLED"})
+                    .exclude(status="HELD", expires_at__lte=now).values("window_id").annotate(n=Count("pk")).values("n"))
+        windows = (DeliveryWindow.objects.filter(is_active=True, starts_at__gt=now)
+                   .annotate(used=Coalesce(Subquery(reserved), 0)).filter(used__lt=F("max_orders")).order_by("starts_at", "pk"))
+        for window in windows.iterator():
             local = timezone.localtime(window.starts_at)
             hours = policy.service_hours.get(str(local.weekday()))
             if not hours or not hours[0] <= local.strftime("%H:%M") < hours[1]:
-                continue
-            used = (
-                DeliveryReservation.objects.filter(
-                    window=window, status__in={"HELD", "CONFIRMED", "FULFILLED"}
-                )
-                .exclude(status="HELD", expires_at__lte=timezone.now())
-                .count()
-            )
-            if used >= window.max_orders:
                 continue
             fee = policy.base_fee_rp + ceil(distance / 1000) * policy.per_km_fee_rp
             quotes.append(
@@ -157,6 +163,10 @@ def quote_order(order):
                     package_snapshot={**package, "label": "Kurir Toko"},
                 )
             )
+            if len(quotes) >= 20:
+                break
+        if not quotes:
+            messages.append("Belum ada jadwal Kurir Toko yang tersedia untuk alamat ini.")
     elif distance is not None and distance > policy.max_route_m:
         messages.append(
             "Alamat di luar jangkauan Kurir Toko. Gunakan kurir instan atau ambil di toko."

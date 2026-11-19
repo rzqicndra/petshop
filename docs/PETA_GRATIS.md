@@ -7,7 +7,7 @@ Revisi 17 November 2026. Google Maps/Routes diganti dengan Leaflet 1.9.4, OpenSt
 - Leaflet disimpan dalam static/vendor/leaflet, bukan bergantung pada CDN saat halaman dibuka. File JS/CSS diperiksa terhadap SRI resmi 1.9.4; lisensi dan checksum disertakan.
 - Peta alamat tampil tanpa API key Google. Klik atau geser pin memperbarui latitude/longitude enam desimal dan membatalkan konfirmasi titik lama. Input koordinat manual tetap tersedia jika gambar peta tidak bisa dimuat.
 - Tile OpenStreetMap memakai HTTPS, attribution terlihat, dan kebijakan Referrer-Policy yang tetap mengirim origin. Tidak ada prefetch/offline download atau proxy tile yang menonaktifkan cache browser. MAP_TILE_URL dan attribution dapat diganti oleh pengelola tanpa mengubah JavaScript. Public OSM tiles bersifat best effort dan tidak menyediakan SLA.
-- Perhitungan jarak memakai POST /v2/directions/driving-car/json pada https://api.heigit.org. URL api.openrouteservice.org lama tidak dipakai. Key hanya di backend. Koordinat mengikuti urutan longitude,latitude yang diwajibkan ORS; hasil dalam meter dibulatkan ke atas agar 5000,1 m tidak lolos batas 5000 m.
+- Perhitungan jarak memakai POST /v2/directions/driving-car/json pada https://api.heigit.org/openrouteservice. URL api.openrouteservice.org lama tidak dipakai. Key hanya di backend. Koordinat mengikuti urutan longitude,latitude yang diwajibkan ORS; hasil dalam meter dibulatkan ke atas agar 5000,1 m tidak lolos batas 5000 m.
 - Moda DRIVE dipetakan ke driving-car, WALK ke foot-walking, BICYCLE ke cycling-regular. TWO_WHEELER tidak dipaksakan ke profil mobil secara diam-diam. Kebijakan pengiriman awal memakai DRIVE; hasil bukan estimasi kemacetan Google atau navigasi motor khusus.
 - Cache jarak satu jam berada di PostgreSQL, dibagi antar web/worker. Cache menyimpan hash pasangan titik dan jarak, tidak nama/alamat/nomor telepon. Cache expired tidak dipakai sebagai fallback.
 - Pembatas permintaan per key pada deployment ini: 30/menit dan 1500 per jendela 24 jam. Cache hit tidak menghabiskan permintaan API. Batas akun provider tetap berlaku dan dapat berubah; jika key dipakai di deployment lain, jumlah penggunaan di sana tidak dihitung oleh limiter lokal ini.
@@ -49,7 +49,7 @@ MAP_TILE_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png
 MAP_TILE_ATTRIBUTION=© OpenStreetMap contributors
 ROUTES_MODE=openrouteservice
 ORS_API_KEY=ISI_KEY_STANDARD_ASLI_ANDA
-ORS_BASE_URL=https://api.heigit.org
+ORS_BASE_URL=https://api.heigit.org/openrouteservice
 ORS_REQUESTS_PER_MINUTE=30
 ORS_REQUESTS_PER_DAY=1500
 ORS_CACHE_SECONDS=3600

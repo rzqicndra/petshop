@@ -30,6 +30,7 @@ urlpatterns = [
     path("katalog/", core.catalog_view, name="catalog"),
     path("privasi/", core.privacy, name="privacy"),
     path("produk/foto/<uuid:pk>/", core.product_image, name="product_image"),
+    path("jadwal/", scheduling.timetable, name="timetable"),
     path("layanan/", core.services_view, name="services"),
     path("kontak/", core.contact_view, name="contact"),
     path("ulasan/", core.public_reviews, name="public_reviews"),
