@@ -390,3 +390,14 @@ document.querySelectorAll(".personal-page form, .booking-page form").forEach((fo
     if (section) section.open = true;
   }, true);
 });
+
+// Native radio buttons also work without JavaScript.
+document.querySelectorAll('[data-rating-picker]').forEach((picker) => {
+  const feedback = picker.closest('fieldset').querySelector('[data-rating-feedback]');
+  const update = () => {
+    const selected = picker.querySelector('input:checked');
+    feedback.textContent = selected ? selected.value + ' bintang · ' + selected.dataset.ratingLabel : 'Pilih 1 sampai 5 bintang';
+  };
+  picker.addEventListener('change', update);
+  update();
+});

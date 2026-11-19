@@ -71,6 +71,7 @@ urlpatterns = [
     path("booking/<uuid:pk>/", scheduling.booking_detail, name="booking_detail"),
     path("tagihan/<uuid:pk>/status/", billing.invoice_status, name="invoice_status"),
     path("tagihan/<uuid:pk>/", billing.invoice_view, name="invoice"),
+    path("tagihan/<uuid:pk>/pdf/", billing.invoice_pdf, name="invoice_pdf"),
     path("pembayaran/kembali/", billing.payment_return, name="payment_return"),
     path("cek-pesanan", billing.payment_return, name="payment_return_legacy"),
     path("cek-pesanan/", billing.payment_return),

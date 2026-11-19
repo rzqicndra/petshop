@@ -164,6 +164,7 @@ class ExperienceTests(TestCase):
             {
                 "business_name": "Sinau Satwa Baru",
                 "reschedule_notice_minutes": "120",
+                "attendance_grace_minutes": "15",
                 "cs_whatsapp": "628123456789",
                 "address": "Alamat toko baru",
                 "latitude": "-6.2",

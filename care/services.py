@@ -20,6 +20,65 @@ def doctor_access(actor, visit):
         raise BusinessError("Pasien belum ditugaskan kepada dokter ini.")
 
 
+def attendance_window(booking):
+    from core.models import StoreSettings
+
+    store = StoreSettings.objects.filter(pk=1).first()
+    grace = store.attendance_grace_minutes if store else 15
+    now = timezone.now()
+    return {
+        "can_arrive": now >= booking.starts_at - timedelta(minutes=30),
+        "can_mark_absent": now >= booking.starts_at + timedelta(minutes=grace),
+        "absence_after": booking.starts_at + timedelta(minutes=grace),
+        "grace_minutes": grace,
+    }
+
+
+def record_attendance(actor, booking, attendance, note=""):
+    require_role(actor, {"DOCTOR"})
+    if attendance not in {"PRESENT", "ABSENT"}:
+        raise BusinessError("Pilih Hadir atau Tidak hadir.")
+    with commerce_transaction():
+        booking = Booking.objects.select_for_update().get(pk=booking.pk)
+        visit = Visit.objects.select_for_update().get(booking=booking)
+        doctor_access(actor, visit)
+        if booking.status != "CONFIRMED" or visit.attendance != "PENDING":
+            raise BusinessError("Kehadiran sudah diproses atau kunjungan tidak lagi terjadwal.")
+        window = attendance_window(booking)
+        if attendance == "PRESENT" and not window["can_arrive"]:
+            raise BusinessError("Kehadiran dapat dikonfirmasi mulai 30 menit sebelum jadwal.")
+        if attendance == "ABSENT":
+            if not window["can_mark_absent"]:
+                raise BusinessError(
+                    f"Tunggu hingga {window['grace_minutes']} menit setelah jadwal mulai sebelum menandai tidak hadir."
+                )
+            if not note.strip() or len(note) > 1000:
+                raise BusinessError("Isi catatan ketidakhadiran, maksimal 1000 karakter.")
+            booking.status = "NO_SHOW"
+            ResourceReservation.objects.filter(
+                booking=booking, status__in={"HELD", "CONFIRMED"}
+            ).update(status="RELEASED")
+            from engagement.models import Reminder
+
+            Reminder.objects.filter(booking=booking, status="PENDING").update(status="CANCELED")
+        visit.attendance, visit.attendance_at, visit.attendance_note = (
+            attendance,
+            timezone.now(),
+            note.strip()[:1000],
+        )
+        visit.save(update_fields=["attendance", "attendance_at", "attendance_note", "updated_at"])
+        booking.version += 1
+        booking.save(update_fields=["status", "version", "updated_at"])
+        audit(
+            actor,
+            "visit.attendance_recorded",
+            visit,
+            after={"attendance": attendance},
+            reason=visit.attendance_note,
+        )
+        return visit
+
+
 def start_care(actor, booking):
     if booking.kind_snapshot == "VET":
         doctor_access(actor, Visit.objects.get(booking=booking))
@@ -30,7 +89,10 @@ def start_care(actor, booking):
     with commerce_transaction():
         booking = Booking.objects.select_for_update().get(pk=booking.pk)
         if booking.kind_snapshot == "VET":
-            doctor_access(actor, Visit.objects.get(booking=booking))
+            visit = Visit.objects.get(booking=booking)
+            doctor_access(actor, visit)
+            if visit.attendance != "PRESENT":
+                raise BusinessError("Konfirmasi pelanggan hadir sebelum memulai pemeriksaan.")
         elif GroomingJob.objects.get(booking=booking).groomer_id != actor.pk:
             raise BusinessError("Penugasan layanan telah berubah. Muat ulang antrean.")
         if booking.status != "CONFIRMED":
@@ -73,7 +135,14 @@ def save_medical(actor, visit, data, publish=False, file=None):
             "Keluhan, temuan, diagnosis, tindakan, dan panduan perawatan wajib lengkap sebelum terbit."
         )
     with commerce_transaction():
-        Visit.objects.select_for_update().get(pk=visit.pk)
+        current_booking = Booking.objects.select_for_update().get(pk=visit.booking_id)
+        visit = Visit.objects.select_for_update().get(pk=visit.pk)
+        doctor_access(actor, visit)
+        if (
+            current_booking.status not in {"IN_SERVICE", "READY_PICKUP", "COMPLETED"}
+            or visit.attendance != "PRESENT"
+        ):
+            raise BusinessError("Kunjungan belum dimulai atau pelanggan tidak hadir.")
         versions = MedicalRecordVersion.objects.filter(visit=visit).order_by("-version_no")
         latest = versions.first()
         published = versions.filter(published_at__isnull=False).exists()

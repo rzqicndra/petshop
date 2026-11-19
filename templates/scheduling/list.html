@@ -4,7 +4,7 @@
 <div class="page-heading">
 <div>
 <p class="eyebrow">JADWAL & RIWAYAT</p>
-<h1>Perjalanan perawatan.</h1>
+<h1>{% if workspace_role == 'DOCTOR' %}Jadwal konsultasi{% else %}Booking & riwayat{% endif %}</h1>
 <p>Detail layanan, hasil perawatan, dan tagihan tersimpan pada masing-masing Booking.</p>
 </div>{% if not staff_workspace %}<a class="button" href="{% url 'new_booking' %}">Booking baru ＋</a>{% elif can_operate %}<a class="button" href="{% url 'walkin' %}">Pelanggan datang langsung ＋</a>{% endif %}</div>
 <div class="table-toolbar">
@@ -21,7 +21,7 @@
 <th>Booking & hewan</th>
 <th>Layanan</th>
 <th>Jadwal</th>
-<th>Status</th>
+<th>Status</th>{% if workspace_role == 'DOCTOR' %}<th>Kehadiran</th>{% endif %}
 <th>Detail</th>
 </tr>
 </thead>
@@ -31,10 +31,11 @@
 <td>{{ booking.starts_at|date:'d M Y, H:i' }}{% if booking.kind_snapshot == 'BOARDING' %}<span class="muted">s.d. {{ booking.ends_at|date:'d M Y, H:i' }}</span>{% endif %}</td>
 <td><span class="badge {{ booking.status|status_tone }}">{% if booking.kind_snapshot == 'BOARDING' and booking.status == 'IN_SERVICE' %}Sedang menginap{% else %}{{ booking.status|status_label }}{% endif %}</span>
 </td>
-<td><a href="{% url 'booking_detail' booking.pk %}">Lihat {% icon 'arrow' %}</a>
+{% if workspace_role == 'DOCTOR' %}<td>{% if booking.attendance_status == 'PRESENT' %}<span class="badge green">Hadir</span>{% elif booking.attendance_status == 'ABSENT' %}<span class="badge red">Tidak hadir</span>{% else %}<span class="small muted">Belum dikonfirmasi</span>{% endif %}</td>{% endif %}
+<td><a href="{% url 'booking_detail' booking.pk %}">{% if workspace_role == 'DOCTOR' %}Kelola kunjungan{% else %}Lihat{% endif %} {% icon 'arrow' %}</a>
 </td>
 </tr>{% empty %}<tr>
-<td colspan="5">
+<td colspan="{% if workspace_role == 'DOCTOR' %}6{% else %}5{% endif %}">
 <div class="empty-state">Belum ada Booking yang sesuai.</div>
 </td>
 </tr>{% endfor %}</tbody>

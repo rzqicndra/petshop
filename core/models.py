@@ -22,6 +22,12 @@ class StoreSettings(TimestampedModel):
     cs_whatsapp = models.CharField(max_length=32, default="", blank=True, null=True)
     timezone = models.CharField(max_length=60, default="", blank=True)
     opening_hours = models.JSONField(default=dict, blank=True)
+    attendance_grace_minutes = models.PositiveSmallIntegerField(
+        default=15,
+        validators=[MaxValueValidator(120)],
+        verbose_name="Toleransi keterlambatan konsultasi (menit)",
+        help_text="Dokter dapat menandai tidak hadir setelah jadwal mulai ditambah toleransi ini. Maksimal 120 menit.",
+    )
     reschedule_notice_minutes = models.PositiveSmallIntegerField(
         default=120,
         validators=[MinValueValidator(15), MaxValueValidator(1440)],
@@ -50,6 +56,9 @@ class StoreSettings(TimestampedModel):
     class Meta:
         constraints = [
             models.CheckConstraint(condition=Q(id=1), name="store_singleton"),
+            models.CheckConstraint(
+                condition=Q(attendance_grace_minutes__lte=120), name="store_attendance_grace_range"
+            ),
             models.CheckConstraint(
                 condition=Q(reschedule_notice_minutes__gte=15, reschedule_notice_minutes__lte=1440),
                 name="store_reschedule_notice_range",

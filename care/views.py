@@ -1,9 +1,3 @@
-import io
-from xml.sax.saxutils import escape
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from accounts.permissions import verified_login, active_role
@@ -21,47 +15,66 @@ def medical_pdf(request, pk):
         visit__booking__in=visible_bookings(request.user),
     )
     booking = record.visit.booking
-    buf = io.BytesIO()
-    doc = SimpleDocTemplate(
-        buf,
-        pagesize=(21 * cm, 29.7 * cm),
-        rightMargin=2 * cm,
-        leftMargin=2 * cm,
-        topMargin=2 * cm,
-        bottomMargin=2 * cm,
-    )
-    styles = getSampleStyleSheet()
-    styles["Title"].textColor = colors.HexColor("#24483D")
+    from core.models import StoreSettings
+    from core.pdf import styles, text, metadata, document, local_date
+    from reportlab.platypus import Spacer
+
+    store = StoreSettings.objects.select_related("logo_file").filter(pk=1).first()
+    theme = styles()
     content = [
-        Paragraph("Sinau Satwa", styles["Title"]),
-        Paragraph("Ringkasan pemeriksaan dan panduan perawatan", styles["Heading2"]),
+        text("Ringkasan pemeriksaan", theme["title"]),
+        text("Hasil konsultasi dan panduan perawatan", theme["muted"]),
+        Spacer(1, 8),
     ]
+    content.append(
+        metadata(
+            [
+                ("Nomor booking", booking.code),
+                ("Hewan", f"{booking.pet.name} - {booking.pet.species.name}"),
+                ("Pemilik", booking.customer.name),
+                ("Dokter pemeriksa", record.author.full_name),
+                (
+                    "Tanggal pemeriksaan",
+                    local_date(record.visit.examined_at or booking.starts_at, store),
+                ),
+                ("Diterbitkan", local_date(record.published_at, store)),
+                ("Versi dokumen", str(record.version_no)),
+            ],
+            theme,
+        )
+    )
     sections = [
-        ("Booking", booking.code),
-        ("Hewan", booking.pet.name),
-        ("Dokter", record.author.full_name),
-        ("Versi", record.version_no),
-        ("Diterbitkan", str(record.published_at)),
         ("Keluhan", record.complaint),
-        ("Temuan", record.findings),
+        ("Hasil pemeriksaan", record.findings),
         ("Diagnosis", record.diagnosis),
-        ("Tindakan / terapi", record.treatment),
-        ("Panduan perawatan", record.aftercare),
-        ("Kontrol berikutnya", str(record.followup_at or "Sesuai arahan dokter")),
-        ("Alasan revisi", record.revision_reason or "Versi awal"),
+        ("Tindakan dan terapi", record.treatment),
+        ("Perawatan di rumah", record.aftercare),
+        (
+            "Kontrol berikutnya",
+            (
+                local_date(record.followup_at, store)
+                if record.followup_at
+                else "Sesuai arahan dokter."
+            ),
+        ),
     ]
     if record.inpatient_recommended:
-        sections.append(("Anjuran dokter", "Rawat inap"))
-    for label, value in sections:
-        content.extend(
-            [
-                Spacer(1, 0.25 * cm),
-                Paragraph(escape(label), styles["Heading3"]),
-                Paragraph(escape(str(value)).replace("\n", "<br/>"), styles["BodyText"]),
-            ]
+        sections.append(
+            (
+                "Anjuran tindak lanjut",
+                "Dokter merekomendasikan rawat inap. Hubungi tim perawatan untuk pengaturan lebih lanjut.",
+            )
         )
-    doc.build(content)
-    buf.seek(0)
+    if record.revision_reason:
+        sections.append(("Catatan revisi", record.revision_reason))
+    for label, value in sections:
+        content += [text(label, theme["section"]), text(value, theme["body"])]
+    buf = document(
+        content,
+        store,
+        f"Ringkasan pemeriksaan {booking.code}",
+        footer="Dokumen perawatan privat. Simpan dan bagikan hanya kepada pihak yang berkepentingan.",
+    )
     audit(request.user, "medical.pdf_downloaded", record, after={"version": record.version_no})
     return FileResponse(
         buf,

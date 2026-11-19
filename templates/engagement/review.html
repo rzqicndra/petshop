@@ -1,19 +1,10 @@
-{% extends 'base.html' %}{% block title %}Tulis ulasan · {{ store_settings.business_name|default:"Sinau Satwa" }}
-{% endblock %}
+{% extends 'base.html' %}{% load sinau %}{% block title %}Tulis ulasan · {{ store_settings.business_name|default:'Sinau Satwa' }}{% endblock %}
 {% block content %}
-<div class="page-heading">
-<div>
-<p class="eyebrow">PENGALAMAN ANDA</p>
-<h1>Bagikan ceritanya.</h1>
-<p>Ulasan ditautkan ke transaksi selesai milik Anda.</p>
-</div>
-</div>
-<section class="panel narrow">
-<h2>Bagaimana pengalaman Anda?</h2>
-<p class="muted small">{{ target }}</p>
-<form method="post" class="stack-form">{% csrf_token %}{% include 'includes_form.html' %}<button class="button" type="submit">Simpan ulasan ☆</button>
-</form>
-<p class="banner-note">Jangan masukkan nomor telepon, alamat rumah, atau informasi medis pribadi ke dalam ulasan publik.</p>
-</section>
+<div class="review-compose"><header class="page-heading"><div><h1>Bagaimana pengalaman Anda?</h1><p>Penilaian Anda membantu pelanggan lain memilih layanan dan produk.</p></div></header>
+<section class="panel"><div class="review-target">{% icon 'bag' %}<div><strong>{{ target_label }}</strong><small>{{ target_code }}</small></div></div>
+<form method="post" class="stack-form">{% csrf_token %}{% for error in form.non_field_errors %}<p class="form-errors" role="alert">{{ error }}</p>{% endfor %}
+<fieldset class="rating-field"><legend>Berikan rating</legend><div class="rating-picker" data-rating-picker>{% for value,label in rating_options %}<label class="rating-choice"><input type="radio" name="rating" value="{{ value }}" required {% if form.rating.value|stringformat:'s' == value|stringformat:'s' %}checked{% endif %} data-rating-label="{{ label }}"><span aria-hidden="true">{% icon 'star' %}</span><small class="sr-only">{{ value }} bintang · {{ label }}</small></label>{% endfor %}</div><p class="rating-feedback" data-rating-feedback role="status">Pilih 1 sampai 5 bintang</p>{% for error in form.rating.errors %}<p class="form-errors" role="alert">{{ error }}</p>{% endfor %}</fieldset>
+<div class="field"><label for="{{ form.comment.id_for_label }}">Ceritakan pengalaman Anda</label>{{ form.comment }}{% for error in form.comment.errors %}<p class="form-errors" role="alert">{{ error }}</p>{% endfor %}<small class="muted">Tulis tentang layanan atau produk yang Anda terima. Maksimal 2000 karakter.</small></div>
+<button class="button centered-action" type="submit">Kirim ulasan</button></form>
+<p class="small muted">Ulasan tampil secara publik. Hindari mencantumkan nomor telepon, alamat, atau informasi medis pribadi.</p></section></div>
 {% endblock %}
-

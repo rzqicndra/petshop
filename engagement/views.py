@@ -46,7 +46,23 @@ def review_view(request, kind, pk):
             )
         except BusinessError as exc:
             form.add_error(None, exc)
-    return render(request, "engagement/review.html", {"form": form, "target": booking or item})
+    return render(
+        request,
+        "engagement/review.html",
+        {
+            "form": form,
+            "target": booking or item,
+            "target_label": booking.package.name if booking else item.product_name,
+            "target_code": booking.code if booking else item.order.code,
+            "rating_options": [
+                (1, "Kurang baik"),
+                (2, "Perlu ditingkatkan"),
+                (3, "Cukup baik"),
+                (4, "Baik"),
+                (5, "Sangat baik"),
+            ],
+        },
+    )
 
 
 @roles_required("SUPER_ADMIN", "ADMIN", "OWNER")

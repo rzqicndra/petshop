@@ -332,8 +332,11 @@ def reschedule_booking(actor, booking, starts_at, expected_version):
             window = reschedule_window(booking)
             if not window["allowed"]:
                 raise BusinessError(
-                    f"Batas ubah jadwal adalah {window['notice']} sebelum layanan. "
-                    "Hubungi toko untuk bantuan."
+                    window["reason"]
+                    or (
+                        f"Batas ubah jadwal adalah {window['notice']} sebelum layanan. "
+                        "Hubungi toko untuk bantuan."
+                    )
                 )
             if starts_at < window["minimum_start"]:
                 raise BusinessError(

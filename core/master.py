@@ -182,6 +182,7 @@ class StoreForm(ImageMasterForm):
             "longitude",
             "timezone",
             "reschedule_notice_minutes",
+            "attendance_grace_minutes",
             "public_contact_ready",
         ]
         widgets = {"address": forms.Textarea(attrs={"rows": 3})}

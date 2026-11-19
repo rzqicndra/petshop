@@ -1,0 +1,1 @@
+{% load sinau %}<span class="rating-stars" role="img" aria-label="{{ value }} dari 5 bintang">{% for filled in value|rating_marks %}<span class="rating-star {% if filled %}on{% endif %}" aria-hidden="true">{% icon 'star' %}</span>{% endfor %}</span>

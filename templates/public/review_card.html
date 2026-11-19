@@ -1,4 +1,7 @@
-<article class="review-card">
-<div class="stars" aria-label="Rating {{ review.rating }} dari 5">{{ review.rating }} / 5</div><blockquote>“{{ review.comment }}”</blockquote><strong>{{ review.customer.name|truncatechars:30 }}</strong>
-<p class="verified">✓ Transaksi selesai terverifikasi</p>
+{% load sinau %}
+<article class="customer-review">
+  <header><span class="avatar small">{{ review.customer.name|initials }}</span><div><strong>{{ review.customer.name|reviewer_name }}</strong><small>{{ review.created_at|date:'d M Y' }}</small></div><span class="review-verified">{% icon 'check' %} Terverifikasi</span></header>
+  {% include 'public/rating_stars.html' with value=review.rating %}
+  <p class="review-comment">{{ review.comment|linebreaksbr }}</p>
+  <footer>{% if review.booking_id %}{{ review.booking.package.name }}{% else %}Pembelian produk{% endif %}{% if review.edited_at %}<span> · Diperbarui</span>{% endif %}</footer>
 </article>

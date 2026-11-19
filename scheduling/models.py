@@ -135,6 +135,7 @@ class Booking(TimestampedModel):
             ("IN_SERVICE", "Sedang dilayani"),
             ("READY_PICKUP", "Siap dijemput"),
             ("COMPLETED", "Selesai"),
+            ("NO_SHOW", "Tidak hadir"),
             ("CANCELED", "Dibatalkan"),
             ("EXPIRED", "Kedaluwarsa"),
             ("NEEDS_ATTENTION", "Perlu penanganan"),

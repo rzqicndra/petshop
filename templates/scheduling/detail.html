@@ -40,6 +40,7 @@
 {% else %}<p class="muted">Rincian pembayaran tersedia setelah pengajuan penitipan disetujui.</p>{% endif %}</section>
 </div>
 {% include 'scheduling/reschedule.html' %}
+{% include 'care/attendance.html' %}
 <div class="booking-sections">
 <div>
 {% if records %}<section class="panel">
@@ -192,7 +193,7 @@
 <button class="button danger" type="submit" name="action" value="stay_reject">Tolak pengajuan</button>
 </form>
 </section>{% endif %}
-{% if is_doctor and booking.status == 'CONFIRMED' or is_groomer and booking.status == 'CONFIRMED' %}<section class="panel">
+{% if is_doctor and booking.status == 'CONFIRMED' and visit.attendance == 'PRESENT' or is_groomer and booking.status == 'CONFIRMED' %}<section class="panel">
 <h2>Pelaksanaan layanan</h2>
 <form method="post">{% csrf_token %}<button class="button full" type="submit" name="action" value="start">Mulai layanan {% icon 'arrow' %}</button>
 </form>

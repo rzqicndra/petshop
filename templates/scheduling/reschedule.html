@@ -14,7 +14,7 @@
   </details>
   {% else %}
     <h2 id="reschedule-title">Perubahan jadwal ditutup</h2>
-    <p class="muted">Batas perubahan adalah {{ reschedule.notice }} sebelum layanan ({{ reschedule.cutoff|date:'d M Y, H:i' }}). Hubungi toko jika Anda memerlukan bantuan.</p>
+    <p class="muted">{% if reschedule.reason %}{{ reschedule.reason }}{% else %}Batas perubahan adalah {{ reschedule.notice }} sebelum layanan ({{ reschedule.cutoff|date:'d M Y, H:i' }}). Hubungi toko jika Anda memerlukan bantuan.{% endif %}</p>
   {% endif %}
 </section>
 {% endif %}

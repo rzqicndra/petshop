@@ -31,6 +31,9 @@ from .services import BusinessError
 
 
 def home(request):
+    from engagement.presentation import rating_summary
+
+    public = Review.objects.filter(status="PUBLISHED")
     return render(
         request,
         "public/home.html",
@@ -43,8 +46,9 @@ def home(request):
                 is_active=True, product__is_active=True, product__category__is_active=True
             ).select_related("product")[:4],
             "reviews": Review.objects.filter(status="PUBLISHED")
-            .select_related("customer")
+            .select_related("customer", "booking__package")
             .order_by("-created_at")[:3],
+            "rating_summary": rating_summary(public),
         },
     )
 
@@ -139,13 +143,31 @@ def contact_view(request):
 
 
 def public_reviews(request):
+    from engagement.presentation import rating_summary
+    from django.core.paginator import Paginator
+
+    public = Review.objects.filter(status="PUBLISHED")
+    shown = public.select_related("customer", "booking__package")
+    rating = request.GET.get("rating", "")
+    if rating in {"1", "2", "3", "4", "5"}:
+        shown = shown.filter(rating=int(rating))
+    else:
+        rating = ""
+    sort = request.GET.get("sort", "new")
+    ordering = {"new": "-created_at", "high": "-rating", "low": "rating"}
+    sort = sort if sort in ordering else "new"
+    page = Paginator(shown.order_by(ordering[sort], "-created_at", "pk"), 12).get_page(
+        request.GET.get("page")
+    )
     return render(
         request,
         "public/reviews.html",
         {
-            "reviews": Review.objects.filter(status="PUBLISHED")
-            .select_related("customer")
-            .order_by("-created_at")[:100]
+            "reviews": page,
+            "page": page,
+            "rating_summary": rating_summary(public),
+            "selected_rating": rating,
+            "selected_sort": sort,
         },
     )
 
@@ -167,9 +189,9 @@ def dashboard(request, role_slug=None):
         "core/staff_dashboard.html" if role != "CUSTOMER" else "core/dashboard.html",
         {
             "today_count": bookings.filter(starts_at__date=timezone.localdate()).count(),
-            "bookings": bookings.exclude(status__in={"COMPLETED", "CANCELED", "EXPIRED"}).order_by(
-                "starts_at"
-            )[:6],
+            "bookings": bookings.exclude(
+                status__in={"COMPLETED", "CANCELED", "EXPIRED", "NO_SHOW"}
+            ).order_by("starts_at")[:6],
             "orders": orders.exclude(status="DRAFT").order_by("-created_at")[:5],
             "booking_count": bookings.filter(
                 status__in={"SUBMITTED", "CONFIRMED", "IN_SERVICE", "AWAITING_PAYMENT"}

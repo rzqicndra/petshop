@@ -1,9 +1,6 @@
-{% extends 'base.html' %}{% block title %}Cerita pelanggan · {{ store_settings.business_name|default:"Sinau Satwa" }}
-{% endblock %}
-{% block content %}
-<section class="public-section">
-{% if site_content.reviews %}<div class="editorial-heading"><p class="eyebrow">{{ site_content.reviews.overline }}</p><h1>{{ site_content.reviews.heading|linebreaksbr }}</h1><p>{{ site_content.reviews.body|linebreaksbr }}</p></div>{% endif %}
-<div class="three-column">{% for review in reviews %}{% include 'public/review_card.html' %}{% empty %}<div class="empty-state">Belum ada ulasan. Ulasan dapat ditulis melalui detail transaksi setelah selesai.</div>{% endfor %}</div>
-</section>
-{% endblock %}
-
+{% extends 'base.html' %}{% block title %}Ulasan pelanggan · {{ store_settings.business_name|default:'Sinau Satwa' }}{% endblock %}
+{% block content %}<section class="public-section reviews-page"><header class="page-heading"><div><h1>{{ site_content.reviews.heading|default:'Ulasan pelanggan' }}</h1><p>{{ site_content.reviews.body|default:'Pengalaman pelanggan bersama layanan dan produk kami.' }}</p></div></header>
+{% include 'public/rating_summary.html' %}
+<form method="get" class="review-filters"><div class="field"><label for="rating-filter">Rating</label><select id="rating-filter" name="rating"><option value="">Semua rating</option>{% for row in rating_summary.distribution %}<option value="{{ row.rating }}" {% if selected_rating == row.rating|stringformat:'s' %}selected{% endif %}>{{ row.rating }} bintang</option>{% endfor %}</select></div><div class="field"><label for="review-sort">Urutkan</label><select id="review-sort" name="sort"><option value="new" {% if selected_sort == 'new' %}selected{% endif %}>Terbaru</option><option value="high" {% if selected_sort == 'high' %}selected{% endif %}>Rating tertinggi</option><option value="low" {% if selected_sort == 'low' %}selected{% endif %}>Rating terendah</option></select></div><button class="button secondary" type="submit">Tampilkan</button></form>
+<div class="review-grid">{% for review in reviews %}{% include 'public/review_card.html' %}{% empty %}<div class="empty-state">Belum ada ulasan untuk pilihan ini.</div>{% endfor %}</div>{% include 'pagination.html' %}
+</section>{% endblock %}

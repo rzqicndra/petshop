@@ -1,0 +1,16 @@
+{% load sinau %}
+{% if visit %}{% if is_doctor or visit.attendance != 'PENDING' %}
+<section class="panel attendance-panel" aria-labelledby="attendance-title">
+  <div class="panel-title"><h2 id="attendance-title">Kehadiran pelanggan</h2><span class="badge {% if visit.attendance == 'PRESENT' %}green{% elif visit.attendance == 'ABSENT' %}red{% else %}amber{% endif %}">{{ visit.get_attendance_display }}</span></div>
+  {% if is_doctor and booking.status == 'CONFIRMED' and visit.attendance == 'PENDING' %}
+    <p>Konfirmasi setelah pelanggan dan hewannya tiba. Pemeriksaan dapat dimulai setelah kehadiran dicatat.</p>
+    <form method="post" class="attendance-arrival">{% csrf_token %}<input type="hidden" name="action" value="attendance"><button class="button centered-action" name="attendance" value="PRESENT" {% if not attendance_window.can_arrive %}disabled{% endif %}>{% icon 'check' %} Pelanggan hadir</button></form>
+    {% if not attendance_window.can_arrive %}<p class="small muted">Kehadiran dapat dikonfirmasi mulai 30 menit sebelum jadwal.</p>{% endif %}
+    <details class="absence-form"><summary>Pelanggan tidak datang?</summary><p class="small muted">Tandai tidak hadir setelah {{ attendance_window.absence_after|date:'d M Y, H:i' }} (toleransi {{ attendance_window.grace_minutes }} menit). Kunjungan akan ditutup; pembayaran tetap tercatat.</p>
+      <form method="post" class="stack-form" data-confirm="Tandai pelanggan tidak hadir dan tutup kunjungan ini?">{% csrf_token %}<input type="hidden" name="action" value="attendance"><div class="field"><label for="absence-note">Catatan ketidakhadiran</label><textarea id="absence-note" name="note" rows="2" maxlength="1000" required placeholder="Contoh: pelanggan belum tiba setelah dihubungi."></textarea></div><button class="button danger centered-action" name="attendance" value="ABSENT" {% if not attendance_window.can_mark_absent %}disabled{% endif %}>Tandai tidak hadir</button></form>
+    </details>
+  {% elif visit.attendance == 'PRESENT' %}<p class="small muted">Hadir pada {{ visit.attendance_at|date:'d M Y, H:i' }}{% if not visit.attendance_at %}sesuai catatan pemeriksaan{% endif %}. {% if booking.status == 'CONFIRMED' %}Menunggu pemeriksaan dimulai.{% endif %}</p>
+  {% elif visit.attendance == 'ABSENT' %}<p>Kunjungan ditutup karena pelanggan tidak hadir. Pemeriksaan tidak dilanjutkan.</p>{% if is_doctor or can_operate %}<p class="small muted">{{ visit.attendance_note }}</p>{% endif %}
+  {% endif %}
+</section>
+{% endif %}{% endif %}

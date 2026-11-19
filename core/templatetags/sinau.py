@@ -5,6 +5,17 @@ register = template.Library()
 
 
 @register.filter
+def rating_marks(value):
+    return [index <= int(value or 0) for index in range(1, 6)]
+
+
+@register.filter
+def reviewer_name(value):
+    names = str(value or "Pelanggan").split() or ["Pelanggan"]
+    return names[0] + (" " + names[-1][0] + "." if len(names) > 1 else "")
+
+
+@register.filter
 def rupiah(value):
     try:
         return "Rp" + f"{int(value):,}".replace(",", ".")
@@ -25,7 +36,7 @@ def status_tone(value):
         "PUBLISHED",
     }:
         return "green"
-    if value in {"EXPIRED", "REJECTED", "CANCELED", "VOID", "HIDDEN", "FAILED"}:
+    if value in {"EXPIRED", "REJECTED", "CANCELED", "VOID", "HIDDEN", "FAILED", "NO_SHOW"}:
         return "red"
     if value in {
         "NEEDS_ATTENTION",
@@ -74,6 +85,7 @@ def status_label(value):
         "UNPAID": "Belum dibayar",
         "PAID": "Lunas",
         "COMPLETED": "Selesai",
+        "NO_SHOW": "Tidak hadir",
         "CONFIRMED": "Dikonfirmasi",
         "IN_SERVICE": "Dalam perawatan",
         "READY_PICKUP": "Siap dijemput",

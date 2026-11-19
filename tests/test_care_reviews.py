@@ -12,7 +12,7 @@ from core.models import AuditLog
 from core.services import BusinessError
 from billing.models import Invoice
 from care.models import Visit, MedicalRecordVersion
-from care.services import start_care, save_medical, finish_care
+from care.services import record_attendance, start_care, save_medical, finish_care
 from engagement.models import Review
 from engagement.services import save_review
 from orders.services import draft_order, checkout, pack_order, handover_pickup
@@ -30,6 +30,7 @@ class CareAndReviewTests(TestCase):
         pay(Invoice.objects.get(booking=bk))
         bk.refresh_from_db()
         with patch("django.utils.timezone.now", return_value=self.start):
+            record_attendance(self.users["DOCTOR"], bk, "PRESENT")
             start_care(self.users["DOCTOR"], bk)
         return Visit.objects.get(booking=bk)
 

@@ -1,0 +1,527 @@
+/* Clinical attendance, printable invoices and customer ratings. */
+.attendance-panel .panel-title {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.attendance-arrival {
+  margin-block: 1rem;
+}
+.absence-form {
+  border-top: 1px solid var(--line);
+  padding-top: 0.8rem;
+}
+.attendance-panel .button {
+  justify-content: center;
+}
+.invoice-page {
+  width: 100%;
+  max-width: 1040px;
+  margin-inline: auto;
+  min-width: 0;
+}
+.invoice-page .page-heading {
+  gap: 1rem;
+}
+.invoice-paper {
+  padding: clamp(1.25rem, 4vw, 3rem);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  margin-bottom: 1.25rem;
+}
+.invoice-brand {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2rem;
+  padding-bottom: 1.7rem;
+  border-bottom: 2px solid var(--forest);
+}
+.invoice-brand > div:last-child {
+  text-align: right;
+}
+.invoice-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 0.7rem;
+  border-radius: 0.6rem;
+}
+.invoice-brand strong {
+  font-size: 1.15rem;
+}
+.invoice-brand h2 {
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.3rem;
+}
+.invoice-brand p {
+  color: var(--muted);
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.invoice-brand small {
+  font-size: 0.85rem;
+}
+.invoice-parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding-block: 1.5rem;
+}
+.invoice-parties h3,
+.invoice-history h3 {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0 0 0.6rem;
+  font-weight: 500;
+}
+.invoice-parties p {
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin: 0.4rem 0;
+  overflow-wrap: anywhere;
+}
+.invoice-parties dl {
+  margin: 0;
+}
+.invoice-parties dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+  font-size: 0.875rem;
+}
+.invoice-parties dt {
+  color: var(--muted);
+}
+.invoice-parties dd {
+  margin: 0;
+  text-align: right;
+}
+.invoice-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 45px minmax(100px, 0.4fr) minmax(
+      110px,
+      0.4fr
+    );
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+  padding: 1.15rem 0.85rem;
+  font-size: 0.95rem;
+  align-items: start;
+}
+.invoice-item > strong {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.invoice-item > span:not(:first-child) {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.invoice-column-head {
+  border-radius: 0.6rem 0.6rem 0 0;
+  background: var(--forest);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.invoice-total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  padding-block: 1.5rem;
+}
+.invoice-total > span {
+  font-size: 0.95rem;
+}
+.invoice-total strong {
+  font-size: clamp(1.5rem, 4vw, 1.9rem);
+  overflow-wrap: anywhere;
+}
+.invoice-history {
+  padding-block: 1rem;
+  border-top: 1px solid var(--line);
+}
+.invoice-history > p {
+  font-size: 0.9rem;
+}
+.invoice-payment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.7rem;
+  font-size: 0.9rem;
+}
+.invoice-payment small {
+  display: block;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+.invoice-note {
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+.invoice-note p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+.invoice-actions {
+  display: grid;
+  gap: 1rem;
+}
+.invoice-actions .text-link {
+  justify-self: start;
+}
+.reviews-page,
+.reviews-home {
+  min-width: 0;
+}
+.rating-overview {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.75fr) minmax(240px, 1.25fr);
+  gap: 3rem;
+  padding: 1.8rem 2rem;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  max-width: 850px;
+  margin-bottom: 1.75rem;
+}
+.rating-score > strong {
+  display: inline-block;
+  font-size: 3rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.rating-score > span {
+  margin-left: 0.55rem;
+  color: var(--muted);
+}
+.rating-score p {
+  margin: 0.65rem 0 0.35rem;
+  font-size: 0.95rem;
+}
+.rating-score small {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.rating-distribution {
+  display: grid;
+  gap: 0.5rem;
+}
+.rating-distribution > div {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 30px;
+  gap: 0.7rem;
+  align-items: center;
+}
+.rating-distribution span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+.rating-distribution .icon {
+  width: 14px;
+  height: 14px;
+  fill: #b48b35;
+  stroke: #b48b35;
+}
+.rating-distribution small {
+  text-align: right;
+  color: var(--muted);
+}
+.rating-distribution meter {
+  width: 100%;
+  height: 10px;
+  appearance: none;
+  background: #edf0e9;
+  border-radius: 1rem;
+  border: 0;
+}
+.rating-distribution meter::-webkit-meter-bar {
+  background: #edf0e9;
+  border: 0;
+  border-radius: 1rem;
+}
+.rating-distribution meter::-webkit-meter-optimum-value {
+  background: #b48b35;
+  border-radius: 1rem;
+}
+.rating-distribution meter::-moz-meter-bar {
+  background: #b48b35;
+  border-radius: 1rem;
+}
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+.customer-review {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+}
+.customer-review > header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.customer-review header strong {
+  font-size: 0.95rem;
+}
+.customer-review header small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+.review-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.4rem;
+  background: #eef4e9;
+  color: #3f6545;
+  border-radius: 0.35rem;
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+.review-verified .icon {
+  width: 12px;
+  height: 12px;
+}
+.rating-stars {
+  display: inline-flex;
+  gap: 0.18rem;
+}
+.rating-star .icon {
+  width: 16px;
+  height: 16px;
+  color: #c3c9c1;
+}
+.rating-star.on .icon {
+  color: #b48b35;
+  fill: #b48b35;
+}
+.review-comment {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  margin: 0.8rem 0 1rem;
+  overflow-wrap: anywhere;
+}
+.customer-review > footer {
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.review-home-score {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  margin: 1.25rem 0;
+}
+.review-home-score .icon {
+  fill: #b48b35;
+  color: #b48b35;
+}
+.review-filters {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-block: 1.5rem;
+}
+.review-filters .field {
+  min-width: 170px;
+  margin: 0;
+}
+.review-compose {
+  max-width: 680px;
+  margin-inline: auto;
+}
+.review-compose h1 {
+  font-size: clamp(1.6rem, 4vw, 2rem);
+}
+.review-compose .button {
+  justify-content: center;
+}
+.review-target {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.review-target small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+.rating-field {
+  border: 0;
+  padding: 0;
+  margin: 1rem 0;
+  min-width: 0;
+}
+.rating-field legend {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.rating-picker {
+  display: flex;
+  gap: 0.5rem;
+  margin-block: 0.8rem;
+}
+.rating-choice {
+  position: relative;
+  cursor: pointer;
+}
+.rating-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.rating-choice > span {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: #fff;
+}
+.rating-choice .icon {
+  width: 27px;
+  height: 27px;
+  color: #b8beb4;
+}
+.rating-choice:has(input:checked) .icon,
+.rating-choice:has(~ .rating-choice input:checked) .icon {
+  color: #b48b35;
+  fill: #b48b35;
+}
+.rating-choice:has(input:checked) > span {
+  border-color: #b48b35;
+  background: #fbf6e9;
+}
+.rating-choice:has(input:focus-visible) > span {
+  outline: 3px solid var(--forest);
+  outline-offset: 3px;
+}
+.rating-feedback {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+  min-height: 1.5rem;
+}
+@media (max-width: 1050px) {
+  .review-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .invoice-page .page-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+  .invoice-brand {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  .invoice-brand > div:last-child {
+    text-align: left;
+  }
+  .invoice-parties {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .invoice-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+    padding-inline: 0;
+  }
+  .invoice-column-head {
+    display: none;
+  }
+  .invoice-item > span:not(:first-child) {
+    text-align: right;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .invoice-item [data-label]::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .invoice-total {
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .rating-overview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 1.25rem;
+  }
+  .review-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .review-filters .field {
+    flex: 1 1 130px;
+    min-width: 0;
+  }
+  .review-filters > button {
+    width: 100%;
+  }
+  .review-verified {
+    margin-left: 0;
+  }
+  .rating-picker {
+    gap: 0.35rem;
+  }
+  .rating-choice > span {
+    width: 42px;
+    height: 44px;
+  }
+}
+@media print {
+  body .sidebar,
+  body .workspace-header,
+  body .public-header,
+  body .cs-button,
+  body .workspace-footer,
+  body .public-footer,
+  .invoice-page > .page-heading,
+  .invoice-actions,
+  [data-store-hours] {
+    display: none !important;
+  }
+  .workspace-body {
+    margin: 0 !important;
+  }
+  .invoice-paper {
+    border: 0;
+    padding: 0;
+  }
+}

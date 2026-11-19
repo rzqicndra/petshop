@@ -16,6 +16,17 @@ class Visit(TimestampedModel):
     booking = models.OneToOneField("scheduling.Booking", on_delete=models.PROTECT, related_name="+")
     doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     examined_at = models.DateTimeField(null=True, blank=True)
+    attendance = models.CharField(
+        max_length=10,
+        default="PENDING",
+        choices=[
+            ("PENDING", "Belum dikonfirmasi"),
+            ("PRESENT", "Hadir"),
+            ("ABSENT", "Tidak hadir"),
+        ],
+    )
+    attendance_at = models.DateTimeField(null=True, blank=True)
+    attendance_note = models.CharField(max_length=1000, blank=True)
 
 
 class MedicalRecordVersion(TimestampedModel):

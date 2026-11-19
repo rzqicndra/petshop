@@ -137,6 +137,14 @@ def new_booking(request):
 @verified_login
 def bookings_list(request):
     qs = visible_bookings(request.user).order_by("-starts_at")
+    if active_role(request.user) == "DOCTOR":
+        from django.db.models import OuterRef, Subquery
+
+        qs = qs.annotate(
+            attendance_status=Subquery(
+                Visit.objects.filter(booking_id=OuterRef("pk")).values("attendance")[:1]
+            )
+        )
     if request.GET.get("q"):
         qs = qs.filter(code__icontains=request.GET["q"][:80])
     from django.core.paginator import Paginator
@@ -207,6 +215,13 @@ def booking_detail(request, pk):
                 )
             elif action == "start":
                 care.start_care(request.user, booking)
+            elif action == "attendance":
+                care.record_attendance(
+                    request.user,
+                    booking,
+                    request.POST.get("attendance"),
+                    request.POST.get("note", ""),
+                )
             elif action in {"medical_save", "medical_publish"} and visit:
                 if not is_doctor:
                     from django.core.exceptions import PermissionDenied
@@ -354,6 +369,8 @@ def booking_detail(request, pk):
     from engagement.models import Review
 
     role = active_role(request.user)
+    from care.services import attendance_window
+
     reschedule = (
         reschedule_window(booking)
         if role == "CUSTOMER" and booking.status == "CONFIRMED" and not stay
@@ -387,6 +404,7 @@ def booking_detail(request, pk):
             ),
             "selected_start": request.POST.get("starts_at", ""),
             "visit": visit,
+            "attendance_window": attendance_window(booking) if visit else None,
             "job": job,
             "stay": stay,
             "records": records,

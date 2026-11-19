@@ -141,13 +141,26 @@ def reschedule_window(booking, *, now=None, store=None):
         if part
     )
     cutoff = booking.starts_at - notice
+    checked_in = False
+    if booking.kind_snapshot == "VET":
+        from care.models import Visit
+
+        checked_in = Visit.objects.filter(
+            booking=booking, attendance__in={"PRESENT", "ABSENT"}
+        ).exists()
     return {
         "allowed": booking.kind_snapshot in MAX_MINUTES
         and booking.status == "CONFIRMED"
+        and not checked_in
         and now <= cutoff,
         "cutoff": cutoff,
         "minimum_start": now + notice,
         "notice": label,
+        "reason": (
+            "Kehadiran sudah dikonfirmasi. Hubungi toko untuk perubahan jadwal."
+            if checked_in
+            else ""
+        ),
     }
 
 

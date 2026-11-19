@@ -9,7 +9,7 @@ from django.utils import timezone
 from billing.models import Invoice
 from billing.services import request_refund, process_refund
 from care.models import Visit
-from care.services import start_care, save_medical
+from care.services import record_attendance, start_care, save_medical
 from core.models import StoreSettings
 from core.services import BusinessError
 from delivery.routing import directions_base_url
@@ -204,6 +204,7 @@ class AppointmentTests(TestCase):
         pay(Invoice.objects.get(booking=bk))
         bk.refresh_from_db()
         with patch("django.utils.timezone.now", return_value=self.start):
+            record_attendance(self.users["DOCTOR"], bk, "PRESENT")
             start_care(self.users["DOCTOR"], bk)
         visit = Visit.objects.get(booking=bk)
         data = {

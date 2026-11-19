@@ -1,0 +1,5 @@
+{% load sinau %}
+<section class="rating-overview" aria-label="Ringkasan rating pelanggan">
+  <div class="rating-score">{% if rating_summary.total %}<strong>{{ rating_summary.average|floatformat:1 }}</strong><span>dari 5</span><p>{{ rating_summary.total }} ulasan pelanggan</p>{% else %}<strong>—</strong><p>Belum ada rating</p>{% endif %}<small>Ulasan dari transaksi yang selesai.</small></div>
+  <div class="rating-distribution">{% for row in rating_summary.distribution %}<div><span>{{ row.rating }} {% icon 'star' %}</span><meter min="0" max="100" value="{{ row.percent }}" aria-label="{{ row.rating }} bintang: {{ row.count }} ulasan">{{ row.percent }}%</meter><small>{{ row.count }}</small></div>{% endfor %}</div>
+</section>

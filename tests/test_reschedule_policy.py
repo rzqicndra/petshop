@@ -128,6 +128,7 @@ class ReschedulePolicyTests(TestCase):
                 "business_name": "Sinau Satwa",
                 "timezone": "Asia/Jakarta",
                 "reschedule_notice_minutes": "90",
+                "attendance_grace_minutes": "15",
                 **{f"open_{day}": "08:00" for day in range(7)},
                 **{f"close_{day}": "20:00" for day in range(7)},
             },

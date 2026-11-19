@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_GET
 from accounts.permissions import verified_login, active_role, READ_ALL, OPS, require_role
 from core.services import BusinessError, fingerprint
-from .models import Invoice, PaymentAttempt, PaymentEvent, PaymentTransaction, Refund
+from .models import Invoice, InvoiceLine, PaymentAttempt, PaymentEvent, PaymentTransaction, Refund
 from . import services, providers
 
 
@@ -33,8 +33,7 @@ def payment_return(request):
     return redirect("invoice", pk=attempt.invoice_id)
 
 
-@verified_login
-def invoice_view(request, pk):
+def _visible_invoice(request, pk):
     qs = (
         Invoice.objects.all()
         if active_role(request.user) in READ_ALL
@@ -58,6 +57,27 @@ def invoice_view(request, pk):
             )
         ):
             raise Http404
+    return invoice
+
+
+@verified_login
+@require_GET
+def invoice_pdf(request, pk):
+    from django.http import FileResponse
+    from core.services import audit
+    from .documents import invoice_document
+
+    invoice = _visible_invoice(request, pk)
+    output = invoice_document(invoice)
+    audit(request.user, "invoice.pdf_downloaded", invoice)
+    return FileResponse(
+        output, as_attachment=True, filename=f"{invoice.code}.pdf", content_type="application/pdf"
+    )
+
+
+@verified_login
+def invoice_view(request, pk):
+    invoice = _visible_invoice(request, pk)
     if request.method == "POST":
         try:
             action = request.POST.get("action")
@@ -111,6 +131,8 @@ def invoice_view(request, pk):
         "billing/invoice.html",
         {
             "invoice": invoice,
+            "lines": InvoiceLine.objects.filter(invoice=invoice).order_by("created_at", "pk"),
+            "target": invoice.booking or invoice.order or invoice.extension.stay.booking,
             "attempts": PaymentAttempt.objects.filter(invoice=invoice).order_by("-created_at"),
             "payments": PaymentTransaction.objects.filter(invoice=invoice),
             "can_operate": active_role(request.user) in OPS,
